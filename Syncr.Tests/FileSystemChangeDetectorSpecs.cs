@@ -72,14 +72,14 @@ namespace Syncr.Tests
 
             IEnumerable<FileSystemChange> changeSet = null;
 
-            "when changes are detected for the destination filesystem".Do(
+            "when changes are detected for the destination filesystem using conflict behavior 'skip'".Do(
                 () =>
                 {
                     changeSet = new FileSystemChangeDetector().DetermineChangesToDestination(this.FakeSourceEntries, this.FakeDestinationEntries, ConflictBehavior.Skip);
                 }
             );
 
-            "then a change for creating the missing file should be included".Assert(
+            "then no change for the conflicting file should be included".Assert(
                 () =>
                 {
                     changeSet.ShouldNotBe(null);
@@ -103,14 +103,14 @@ namespace Syncr.Tests
 
             IEnumerable<FileSystemChange> changeSet = null;
 
-            "when changes are detected for the destination filesystem".Do(
+            "when changes are detected for the destination filesystem using conflict behavior 'take source'".Do(
                 () =>
                 {
                     changeSet = new FileSystemChangeDetector().DetermineChangesToDestination(this.FakeSourceEntries, this.FakeDestinationEntries, ConflictBehavior.TakeSource);
                 }
             );
 
-            "then a change for creating the missing file should be included".Assert(
+            "then a change for ovwriting the destination file should be included".Assert(
                 () =>
                 {
                     changeSet.ShouldNotBe(null);
@@ -136,14 +136,14 @@ namespace Syncr.Tests
 
             IEnumerable<FileSystemChange> changeSet = null;
 
-            "when changes are detected for the destination filesystem".Do(
+            "when changes are detected for the destination filesystem using conflict behavior 'take newest'".Do(
                 () =>
                 {
                     changeSet = new FileSystemChangeDetector().DetermineChangesToDestination(this.FakeSourceEntries, this.FakeDestinationEntries, ConflictBehavior.TakeNewest);
                 }
             );
 
-            "then a change for creating the missing file should be included".Assert(
+            "then no change should be included for the conflicted file".Assert(
                 () =>
                 {
                     changeSet.ShouldNotBe(null);
@@ -167,14 +167,14 @@ namespace Syncr.Tests
 
             IEnumerable<FileSystemChange> changeSet = null;
 
-            "when changes are detected for the destination filesystem".Do(
+            "when changes are detected for the destination filesystem when using conflict behavior 'take newest'".Do(
                 () =>
                 {
                     changeSet = new FileSystemChangeDetector().DetermineChangesToDestination(this.FakeSourceEntries, this.FakeDestinationEntries, ConflictBehavior.TakeNewest);
                 }
             );
 
-            "then a change for creating the missing file should be included".Assert(
+            "then a change for ovewriting the destionation file should be included".Assert(
                 () =>
                 {
                     changeSet.ShouldNotBe(null);
