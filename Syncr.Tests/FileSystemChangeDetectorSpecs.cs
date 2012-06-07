@@ -1,14 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using Xunit;
-using Shouldly;
-using SubSpec;
+using Bddify;
 using Moq;
-using System.IO;
-using System.Diagnostics;
-using Xunit.Extensions;
+using Shouldly;
+using Xunit;
 
 namespace Syncr.Tests
 {
@@ -28,327 +24,315 @@ namespace Syncr.Tests
         }
     }
 
-    public class When_Detecting_Changes_To_Destination : FileDetectionSpec
+    public class Detecting_Changes_To_Destination : FileDetectionSpec
     {
-        [Specification]
-        public virtual void ChangeSet_Should_Include_Creation_Of_Files_Missing_On_Destination()
+        public class When_File_Is_On_Source_But_Not_Destination : FileDetectionSpec
         {
-            "Given an unsynced source filesystem".Context(
-                () =>
-                {
-                    FakeSourceEntries.Add(
-                        new FakeFileEntry() { RelativePath = "foo.txt", Size = 100, Name = "foo.txt" });
-                }
-            );
-
             IEnumerable<FileSystemChange> changeSet = null;
 
-            "When changes are detected for the destination filesystem".Do(
-                () =>
-                {
-                    changeSet = new FileSystemChangeDetector().DetermineChangesToDestination(this.FakeSourceEntries, this.FakeDestinationEntries, ConflictBehavior.Skip);
-                }
-            );
+            public void Given_An_Unsynced_FileSystem()
+            {
+                FakeSourceEntries.Add(new FakeFileEntry() { RelativePath = "foo.txt", Size = 100, Name = "foo.txt" });
+            }
 
-            "Then a change for creating the missing file should be included".Assert(
-                () =>
-                {
-                    changeSet.ShouldNotBe(null);
-                    changeSet.Count().ShouldBe(1);
-                    changeSet.First().ChangeType.ShouldBe(FileSystemChangeType.Create);
-                    changeSet.First().Entry.ShouldBeSameAs(FakeSourceEntries[0]);
-                }
-            );
+            public void When_Changes_To_Destination_Are_Detected()
+            {
+                changeSet = new FileSystemChangeDetector().DetermineChangesToDestination(this.FakeSourceEntries, this.FakeDestinationEntries, ConflictBehavior.Skip);
+            }
+
+            public void Then_A_Change_For_A_Source_File_Not_On_Destination_Should_Be_Included()
+            {
+                changeSet.ShouldNotBe(null);
+                changeSet.Count().ShouldBe(1);
+                changeSet.First().ChangeType.ShouldBe(FileSystemChangeType.Create);
+                changeSet.First().Entry.ShouldBeSameAs(FakeSourceEntries[0]);
+            }
+
+            [Fact]
+            public void It_Should_Be_Included_In_Changeset()
+            {
+                this.Bddify();
+            }
         }
 
-        [Specification]
-        public virtual void ChangeSet_Should_Not_Include_Changes_For_Skipped_Conflicts()
+        public class When_A_Conflicted_File_Is_On_Both_FileSystems_With_Skip : FileDetectionSpec
         {
-            "Given a source filesystem with a conflicted file on the destination filesystem".Context(
-                () =>
-                {
-                    FakeSourceEntries.Add(
-                        new FakeFileEntry() { RelativePath = "foo.txt", Size = 100, Name = "foo.txt" });
-                    FakeDestinationEntries.Add(
-                        new FakeFileEntry() { RelativePath = "foo.txt", Size = 200, Name = "foo.txt" });
-                }
-            );
-
             IEnumerable<FileSystemChange> changeSet = null;
 
-            "when changes are detected for the destination filesystem using conflict behavior 'skip'".Do(
-                () =>
-                {
-                    changeSet = new FileSystemChangeDetector().DetermineChangesToDestination(this.FakeSourceEntries, this.FakeDestinationEntries, ConflictBehavior.Skip);
-                }
-            );
+            public void Given_A_Source_FileSystem_With_A_Conflicted_File_On_Destination()
+            {
+                FakeSourceEntries.Add(
+                    new FakeFileEntry() { RelativePath = "foo.txt", Size = 100, Name = "foo.txt" });
+                FakeDestinationEntries.Add(
+                    new FakeFileEntry() { RelativePath = "foo.txt", Size = 200, Name = "foo.txt" });
+            }
 
-            "then no change for the conflicting file should be included".Assert(
-                () =>
-                {
-                    changeSet.ShouldNotBe(null);
-                    changeSet.Count().ShouldBe(0);
-                }
-            );
+            public void When_Changes_Are_Detected_For_The_Destination_With_ConflictBehavior_Skip()
+            {
+                changeSet = new FileSystemChangeDetector().DetermineChangesToDestination(this.FakeSourceEntries, this.FakeDestinationEntries, ConflictBehavior.Skip);
+            }
+
+            public void Then_No_Change_For_The_Conflicting_File_Should_Be_In_The_Changeset()
+            {
+                changeSet.ShouldNotBe(null);
+                changeSet.Count().ShouldBe(0);
+            }
+
+            [Fact]
+            public void No_Change_For_The_Conflicting_File_Should_Be_In_The_Changeset()
+            {
+                this.Bddify();
+            }
         }
 
-        [Specification]
-        public virtual void ChangeSet_Should_Include_Replacement_Of_Conflicted_Destination_When_ConflictBehavior_Set_To_TakeSource()
+        public class When_A_Conflicted_File_Is_On_Both_FileSystems_With_TakeSource : FileDetectionSpec
         {
-            "Given a source filesystem with a conflicted file on the destination filesystem".Context(
-                () =>
-                {
-                    FakeSourceEntries.Add(
-                        new FakeFileEntry() { RelativePath = "foo.txt", Size = 100, Name = "foo.txt" });
-                    FakeDestinationEntries.Add(
-                        new FakeFileEntry() { RelativePath = "foo.txt", Size = 200, Name = "foo.txt" });
-                }
-            );
-
             IEnumerable<FileSystemChange> changeSet = null;
 
-            "when changes are detected for the destination filesystem using conflict behavior 'take source'".Do(
-                () =>
-                {
-                    changeSet = new FileSystemChangeDetector().DetermineChangesToDestination(this.FakeSourceEntries, this.FakeDestinationEntries, ConflictBehavior.TakeSource);
-                }
-            );
+            public void Given_A_Source_FIleSystem_With_Conflicted_File_On_Destination()
+            {
+                FakeSourceEntries.Add(
+                    new FakeFileEntry() { RelativePath = "foo.txt", Size = 100, Name = "foo.txt" });
+                FakeDestinationEntries.Add(
+                    new FakeFileEntry() { RelativePath = "foo.txt", Size = 200, Name = "foo.txt" });
+            }
 
-            "then a change for ovwriting the destination file should be included".Assert(
-                () =>
-                {
-                    changeSet.ShouldNotBe(null);
-                    changeSet.Count().ShouldBe(1);
-                    changeSet.First().ChangeType.ShouldBe(FileSystemChangeType.Overwrite);
-                    changeSet.First().Entry.ShouldBeSameAs(FakeSourceEntries[0]);
-                }
-            );
+            public void When_Changes_Are_Detected_For_Destination()
+            {
+                changeSet = new FileSystemChangeDetector().DetermineChangesToDestination(this.FakeSourceEntries, this.FakeDestinationEntries, ConflictBehavior.TakeSource);
+            }
+
+            public void Then_A_Change_For_OVerwriting_The_Destination_Should_Be_In_Changeset()
+            {
+                changeSet.ShouldNotBe(null);
+                changeSet.Count().ShouldBe(1);
+                changeSet.First().ChangeType.ShouldBe(FileSystemChangeType.Overwrite);
+                changeSet.First().Entry.ShouldBeSameAs(FakeSourceEntries[0]);
+            }
+
+            [Fact]
+            public void A_Change_For_OVerwriting_The_Destination_Should_Be_In_Changeset()
+            {
+                this.Bddify();
+            }
         }
 
-        [Specification]
-        public virtual void ChangeSet_Should_Not_Include_Replacement_Of_Conflicted_Destination_When_Destination_Entry_Is_Newer()
+        public class When_A_Conflicted_File_Is_Newer_On_Destination_Than_Source_With_TakeNewest : FileDetectionSpec
         {
-            "Given a source filesystem with a conflicted file on the destination filesystem".Context(
-               () =>
-               {
-                   FakeSourceEntries.Add(
+            IEnumerable<FileSystemChange> changeSet = null;
+
+            public void Given_A_Source_FileSystem_With_Conflicted_File()
+            {
+                FakeSourceEntries.Add(
                        new FakeFileEntry() { RelativePath = "foo.txt", Size = 100, Name = "foo.txt", Created = DateTime.Now });
-                   FakeDestinationEntries.Add(
-                       new FakeFileEntry() { RelativePath = "foo.txt", Size = 200, Name = "foo.txt", Created = DateTime.Now.AddDays(1.0) });
-               }
-           );
+                FakeDestinationEntries.Add(
+                    new FakeFileEntry() { RelativePath = "foo.txt", Size = 200, Name = "foo.txt", Created = DateTime.Now.AddDays(1.0) });
+            }
 
-            IEnumerable<FileSystemChange> changeSet = null;
+            public void When_Changes_Are_Detected_For_Destination_Using_TakeNewest()
+            {
+                changeSet = new FileSystemChangeDetector().DetermineChangesToDestination(this.FakeSourceEntries, this.FakeDestinationEntries, ConflictBehavior.TakeNewest);
+            }
 
-            "when changes are detected for the destination filesystem using conflict behavior 'take newest'".Do(
-                () =>
-                {
-                    changeSet = new FileSystemChangeDetector().DetermineChangesToDestination(this.FakeSourceEntries, this.FakeDestinationEntries, ConflictBehavior.TakeNewest);
-                }
-            );
+            public void Then_No_Change_Should_Be_Included_For_The_Conflicted_File()
+            {
+                changeSet.ShouldNotBe(null);
+                changeSet.Count().ShouldBe(0);
+            }
 
-            "then no change should be included for the conflicted file".Assert(
-                () =>
-                {
-                    changeSet.ShouldNotBe(null);
-                    changeSet.Count().ShouldBe(0);
-                }
-            );
+            [Fact]
+            public void No_Change_Should_Be_Included_For_The_Conflicted_File()
+            {
+                this.Bddify();
+            }
         }
 
-        [Specification]
-        public virtual void ChangeSet_Should_Include_Replacement_Of_Conflicted_Destination_Entry_When_Destination_Is_Older()
+        public class When_A_Conflicted_File_Is_Newer_On_Source_Than_Destination_With_TakeNewest : FileDetectionSpec
         {
-            "Given a source filesystem with a conflicted file on the destination filesystem".Context(
-               () =>
-               {
-                   FakeSourceEntries.Add(
-                       new FakeFileEntry() { RelativePath = "foo.txt", Size = 100, Name = "foo.txt", Created = DateTime.Now });
-                   FakeDestinationEntries.Add(
-                       new FakeFileEntry() { RelativePath = "foo.txt", Size = 200, Name = "foo.txt", Created = DateTime.Now.AddDays(-1.0) });
-               }
-           );
-
             IEnumerable<FileSystemChange> changeSet = null;
 
-            "when changes are detected for the destination filesystem when using conflict behavior 'take newest'".Do(
-                () =>
-                {
-                    changeSet = new FileSystemChangeDetector().DetermineChangesToDestination(this.FakeSourceEntries, this.FakeDestinationEntries, ConflictBehavior.TakeNewest);
-                }
-            );
+            public void Given_A_Source_FileSystem_With_Conflicted_File_On_Destination()
+            {
+                FakeSourceEntries.Add(
+                    new FakeFileEntry() { RelativePath = "foo.txt", Size = 100, Name = "foo.txt", Created = DateTime.Now });
+                FakeDestinationEntries.Add(
+                    new FakeFileEntry() { RelativePath = "foo.txt", Size = 200, Name = "foo.txt", Created = DateTime.Now.AddDays(-1.0) });
+            }
+            
+            public void When_Changes_Are_Detected_For_Destination_Using_TakeNewest()
+            {
+                changeSet = new FileSystemChangeDetector().DetermineChangesToDestination(this.FakeSourceEntries, this.FakeDestinationEntries, ConflictBehavior.TakeNewest);
+            }
 
-            "then a change for ovewriting the destionation file should be included".Assert(
-                () =>
-                {
-                    changeSet.ShouldNotBe(null);
-                    changeSet.Count().ShouldBe(1);
-                    changeSet.First().ChangeType.ShouldBe(FileSystemChangeType.Overwrite);
-                    changeSet.First().Entry.ShouldBeSameAs(FakeSourceEntries[0]);
-                }
-            );
+            public void Then_A_Change_For_Overwriting_The_Conflicted_File_On_Destination_Should_Be_Included()
+            {
+                changeSet.ShouldNotBe(null);
+                changeSet.Count().ShouldBe(1);
+                changeSet.First().ChangeType.ShouldBe(FileSystemChangeType.Overwrite);
+                changeSet.First().Entry.ShouldBeSameAs(FakeSourceEntries[0]);
+            }
+
+            [Fact]
+            public void A_Change_For_Overwriting_The_Conflicted_File_On_Destination_Should_Be_Included()
+            {
+                this.Bddify();
+            }
         }
     }
 
-    public class When_Detecting_Changes_To_Source : FileDetectionSpec
+    public class Detecting_Changes_To_Source : FileDetectionSpec
     {
-        [Specification]
-        public virtual void ChangeSet_Should_Include_Creation_Of_Files_Missing_On_Source()
+        public class When_File_Is_On_Destination_But_Not_Source : FileDetectionSpec
         {
-            "Given an unsynced source filesystem".Context(
-                () =>
-                {
-                    FakeDestinationEntries.Add(
-                        new FakeFileEntry() { RelativePath = "foo.txt", Size = 100, Name = "foo.txt" });
-                }
-            );
-
             IEnumerable<FileSystemChange> changeSet = null;
 
-            "When changes are detected for the source filesystem".Do(
-                () =>
-                {
-                    changeSet = new FileSystemChangeDetector().DetermineChangesToSource(this.FakeSourceEntries, this.FakeDestinationEntries, ConflictBehavior.Skip);
-                }
-            );
+            public void Given_An_Unsynced_FileSystem()
+            {
+                FakeSourceEntries.Add(new FakeFileEntry() { RelativePath = "foo.txt", Size = 100, Name = "foo.txt" });
+            }
 
-            "Then a change for creating the missing file should be included".Assert(
-                () =>
-                {
-                    changeSet.ShouldNotBe(null);
-                    changeSet.Count().ShouldBe(1);
-                    changeSet.First().ChangeType.ShouldBe(FileSystemChangeType.Create);
-                    changeSet.First().Entry.ShouldBeSameAs(FakeDestinationEntries[0]);
-                }
-            );
+            public void When_Changes_To_Source_Are_Detected()
+            {
+                changeSet = new FileSystemChangeDetector().DetermineChangesToDestination(this.FakeSourceEntries, this.FakeDestinationEntries, ConflictBehavior.Skip);
+            }
+
+            public void Then_A_Change_For_A_Destination_File_Not_On_Source_Should_Be_Included()
+            {
+                changeSet.ShouldNotBe(null);
+                changeSet.Count().ShouldBe(1);
+                changeSet.First().ChangeType.ShouldBe(FileSystemChangeType.Create);
+                changeSet.First().Entry.ShouldBeSameAs(FakeSourceEntries[0]);
+            }
+
+            [Fact]
+            public void It_Should_Be_Included_In_Changeset()
+            {
+                this.Bddify();
+            }
         }
 
-        [Specification]
-        public virtual void ChangeSet_Should_Not_Include_Changes_For_Skipped_Conflicts()
+        public class When_A_Conflicted_File_Is_On_Both_FileSystems_With_Skip : FileDetectionSpec
         {
-            "Given a source filesystem with a conflicted file on the destination filesystem".Context(
-                () =>
-                {
-                    FakeSourceEntries.Add(
-                        new FakeFileEntry() { RelativePath = "foo.txt", Size = 100, Name = "foo.txt" });
-                    FakeDestinationEntries.Add(
-                        new FakeFileEntry() { RelativePath = "foo.txt", Size = 200, Name = "foo.txt" });
-                }
-            );
-
             IEnumerable<FileSystemChange> changeSet = null;
 
-            "when changes are detected for the source filesystem using conflict behavior 'skip'".Do(
-                () =>
-                {
-                    changeSet = new FileSystemChangeDetector().DetermineChangesToSource(this.FakeSourceEntries, this.FakeDestinationEntries, ConflictBehavior.Skip);
-                }
-            );
+            public void Given_A_Destination_FileSystem_With_A_Conflicted_File_On_Source()
+            {
+                FakeSourceEntries.Add(
+                    new FakeFileEntry() { RelativePath = "foo.txt", Size = 100, Name = "foo.txt" });
+                FakeDestinationEntries.Add(
+                    new FakeFileEntry() { RelativePath = "foo.txt", Size = 200, Name = "foo.txt" });
+            }
 
-            "then no change for the conflicting file should be included".Assert(
-                () =>
-                {
-                    changeSet.ShouldNotBe(null);
-                    changeSet.Count().ShouldBe(0);
-                }
-            );
+            public void When_Changes_Are_Detected_For_The_Source_With_ConflictBehavior_Skip()
+            {
+                changeSet = new FileSystemChangeDetector().DetermineChangesToDestination(this.FakeSourceEntries, this.FakeDestinationEntries, ConflictBehavior.Skip);
+            }
+
+            public void Then_No_Change_For_The_Conflicting_File_Should_Be_In_The_Changeset()
+            {
+                changeSet.ShouldNotBe(null);
+                changeSet.Count().ShouldBe(0);
+            }
+
+            [Fact]
+            public void No_Change_For_The_Conflicting_File_Should_Be_In_The_Changeset()
+            {
+                this.Bddify();
+            }
         }
 
-        [Specification]
-        public virtual void ChangeSet_Should_Include_Replacement_Of_Conflicted_Source_When_ConflictBehavior_Set_To_TakeDestination()
+        public class When_A_Conflicted_File_Is_On_Both_FileSystems_With_TakeSource : FileDetectionSpec
         {
-            "Given a source filesystem with a conflicted file on the destination filesystem".Context(
-                () =>
-                {
-                    FakeSourceEntries.Add(
-                        new FakeFileEntry() { RelativePath = "foo.txt", Size = 100, Name = "foo.txt" });
-                    FakeDestinationEntries.Add(
-                        new FakeFileEntry() { RelativePath = "foo.txt", Size = 200, Name = "foo.txt" });
-                }
-            );
-
             IEnumerable<FileSystemChange> changeSet = null;
 
-            "when changes are detected for the destination filesystem using conflict behavior 'take source'".Do(
-                () =>
-                {
-                    changeSet = new FileSystemChangeDetector().DetermineChangesToSource(this.FakeSourceEntries, this.FakeDestinationEntries, ConflictBehavior.TakeDestination);
-                }
-            );
+            public void Given_A_Destination_FIleSystem_With_Conflicted_File_On_Source()
+            {
+                FakeSourceEntries.Add(
+                    new FakeFileEntry() { RelativePath = "foo.txt", Size = 100, Name = "foo.txt" });
+                FakeDestinationEntries.Add(
+                    new FakeFileEntry() { RelativePath = "foo.txt", Size = 200, Name = "foo.txt" });
+            }
 
-            "then a change for ovwriting the destination file should be included".Assert(
-                () =>
-                {
-                    changeSet.ShouldNotBe(null);
-                    changeSet.Count().ShouldBe(1);
-                    changeSet.First().ChangeType.ShouldBe(FileSystemChangeType.Overwrite);
-                    changeSet.First().Entry.ShouldBeSameAs(FakeDestinationEntries[0]);
-                }
-            );
+            public void When_Changes_Are_Detected_For_Source()
+            {
+                changeSet = new FileSystemChangeDetector().DetermineChangesToDestination(this.FakeSourceEntries, this.FakeDestinationEntries, ConflictBehavior.TakeSource);
+            }
+
+            public void Then_A_Change_For_OVerwriting_The_Source_Should_Be_In_Changeset()
+            {
+                changeSet.ShouldNotBe(null);
+                changeSet.Count().ShouldBe(1);
+                changeSet.First().ChangeType.ShouldBe(FileSystemChangeType.Overwrite);
+                changeSet.First().Entry.ShouldBeSameAs(FakeSourceEntries[0]);
+            }
+
+            [Fact]
+            public void A_Change_For_OVerwriting_The_Source_Should_Be_In_Changeset()
+            {
+                this.Bddify();
+            }
         }
 
-        [Specification]
-        public virtual void ChangeSet_Should_Not_Include_Replacement_Of_Conflicted_Source_When_Destination_Entry_Is_Newer()
+        public class When_A_Conflicted_File_Is_Newer_On_Source_Than_Destination_With_TakeNewest : FileDetectionSpec
         {
-            "Given a source filesystem with a conflicted file on the destination filesystem".Context(
-               () =>
-               {
-                   FakeDestinationEntries.Add(
+            IEnumerable<FileSystemChange> changeSet = null;
+
+            public void Given_A_Destination_FileSystem_With_Conflicted_File()
+            {
+                FakeSourceEntries.Add(
                        new FakeFileEntry() { RelativePath = "foo.txt", Size = 100, Name = "foo.txt", Created = DateTime.Now });
-                   FakeSourceEntries.Add(
-                       new FakeFileEntry() { RelativePath = "foo.txt", Size = 200, Name = "foo.txt", Created = DateTime.Now.AddDays(1.0) });
-               }
-           );
+                FakeDestinationEntries.Add(
+                    new FakeFileEntry() { RelativePath = "foo.txt", Size = 200, Name = "foo.txt", Created = DateTime.Now.AddDays(1.0) });
+            }
 
-            IEnumerable<FileSystemChange> changeSet = null;
+            public void When_Changes_Are_Detected_For_Source_Using_TakeNewest()
+            {
+                changeSet = new FileSystemChangeDetector().DetermineChangesToDestination(this.FakeSourceEntries, this.FakeDestinationEntries, ConflictBehavior.TakeNewest);
+            }
 
-            "when changes are detected for the source filesystem using conflict behavior 'take newest'".Do(
-                () =>
-                {
-                    changeSet = new FileSystemChangeDetector().DetermineChangesToSource(this.FakeSourceEntries, this.FakeDestinationEntries, ConflictBehavior.TakeNewest);
-                }
-            );
+            public void Then_No_Change_Should_Be_Included_For_The_Conflicted_File()
+            {
+                changeSet.ShouldNotBe(null);
+                changeSet.Count().ShouldBe(0);
+            }
 
-            "then no change should be included for the conflicted file".Assert(
-                () =>
-                {
-                    changeSet.ShouldNotBe(null);
-                    changeSet.Count().ShouldBe(0);
-                }
-            );
+            [Fact]
+            public void No_Change_Should_Be_Included_For_The_Conflicted_File()
+            {
+                this.Bddify();
+            }
         }
 
-        [Specification]
-        public virtual void ChangeSet_Should_Include_Replacement_Of_Conflicted_Source_Entry_When_Destination_Is_Older()
+        public class When_A_Conflicted_File_Is_Newer_On_Destination_Than_Source_With_TakeNewest : FileDetectionSpec
         {
-            "Given a source filesystem with a conflicted file on the destination filesystem".Context(
-               () =>
-               {
-                   FakeDestinationEntries.Add(
-                       new FakeFileEntry() { RelativePath = "foo.txt", Size = 100, Name = "foo.txt", Created = DateTime.Now });
-                   FakeSourceEntries.Add(
-                       new FakeFileEntry() { RelativePath = "foo.txt", Size = 200, Name = "foo.txt", Created = DateTime.Now.AddDays(-1.0) });
-               }
-           );
-
             IEnumerable<FileSystemChange> changeSet = null;
 
-            "when changes are detected for the source filesystem when using conflict behavior 'take newest'".Do(
-                () =>
-                {
-                    changeSet = new FileSystemChangeDetector().DetermineChangesToSource(this.FakeSourceEntries, this.FakeDestinationEntries, ConflictBehavior.TakeNewest);
-                }
-            );
+            public void Given_A_Destination_FileSystem_With_Conflicted_File_On_Source()
+            {
+                FakeSourceEntries.Add(
+                    new FakeFileEntry() { RelativePath = "foo.txt", Size = 100, Name = "foo.txt", Created = DateTime.Now });
+                FakeDestinationEntries.Add(
+                    new FakeFileEntry() { RelativePath = "foo.txt", Size = 200, Name = "foo.txt", Created = DateTime.Now.AddDays(-1.0) });
+            }
+            
+            public void When_Changes_Are_Detected_For_Source_Using_TakeNewest()
+            {
+                changeSet = new FileSystemChangeDetector().DetermineChangesToDestination(this.FakeSourceEntries, this.FakeDestinationEntries, ConflictBehavior.TakeNewest);
+            }
 
-            "then a change for ovewriting the source file should be included".Assert(
-                () =>
-                {
-                    changeSet.ShouldNotBe(null);
-                    changeSet.Count().ShouldBe(1);
-                    changeSet.First().ChangeType.ShouldBe(FileSystemChangeType.Overwrite);
-                    changeSet.First().Entry.ShouldBeSameAs(FakeDestinationEntries[0]);
-                }
-            );
+            public void Then_A_Change_For_Overwriting_The_Conflicted_File_On_Source_Should_Be_Included()
+            {
+                changeSet.ShouldNotBe(null);
+                changeSet.Count().ShouldBe(1);
+                changeSet.First().ChangeType.ShouldBe(FileSystemChangeType.Overwrite);
+                changeSet.First().Entry.ShouldBeSameAs(FakeSourceEntries[0]);
+            }
+
+            [Fact]
+            public void A_Change_For_Overwriting_The_Conflicted_File_On_Source_Should_Be_Included()
+            {
+                this.Bddify();
+            }
         }
     }
 }
