@@ -13,5 +13,9 @@ namespace Syncr
         ISyncProvider Destination { get; }
         SyncronizationOptions Options { get; }
         event EventHandler<FileSystemUpdatedEventArgs> FileSystemUpdated;
+        event EventHandler Started;
+        event EventHandler Stopped;
+        event EventHandler IterationStarted;
+        event EventHandler IterationCompleted;
     }
 }

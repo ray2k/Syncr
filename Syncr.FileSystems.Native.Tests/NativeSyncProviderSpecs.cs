@@ -18,10 +18,12 @@ namespace Syncr.FileSystems.Native.Tests
     public abstract class NativeSyncProviderSpec
     {
         public MockFileSystem MockFileSystem;
+        public Mock<INetworkConnectionFactory> MockConnectionFactory;
 
         public NativeSyncProviderSpec()
         {
             MockFileSystem = new MockFileSystem();
+            MockConnectionFactory = new Mock<INetworkConnectionFactory>();
         }
 
         protected NativeSyncProvider CreateInstance(LinuxFileSystemOptions options)
@@ -31,11 +33,56 @@ namespace Syncr.FileSystems.Native.Tests
 
         protected NativeSyncProvider CreateInstance(WindowsFileSystemOptions options)
         {
-            return new NativeSyncProvider(MockFileSystem, options);
+            return new NativeSyncProvider(MockFileSystem, MockConnectionFactory.Object, options);
         }
 
         protected NativeSyncProvider CurrentInstance { get; set; }
     }
+
+    public class Querying_Contents_Using_Network_Path : NativeSyncProviderSpec
+    {
+        Mock<INetworkConnection> MockConnection;
+        IList<FileSystemEntry> FoundEntires;
+
+        public void Context()
+        {
+            MockConnection = new Mock<INetworkConnection>();
+            MockConnection.Setup(p => p.Connect());
+
+            MockConnectionFactory.Setup(p => p.CreateConnection("\\\\remotepath\\remotedir\\", "username", "password", "domain")).Returns(MockConnection.Object);
+        }
+
+        public void Given_a_remote_native_filesystem_with_a_file_and_directory()
+        {
+            CurrentInstance = CreateInstance(
+                new WindowsFileSystemOptions()
+                {
+                    Path = "\\\\remotepath\\remotedir",
+                    Domain = "domain",
+                    Password = "password",
+                    UserName = "username"
+                }
+            );
+        }
+
+        public void When_it_is_queried_for_contents()
+        {
+            FoundEntires = CurrentInstance.GetFileSystemEntries(SearchOption.AllDirectories).ToList();
+        }
+
+        public void Then_it_should_make_a_connection_to_the_remote_filesystem()
+        {
+            MockConnectionFactory.VerifyAll();
+            MockConnection.VerifyAll();
+        }
+
+        [Fact]
+        public void Should_connect_to_the_remote_filsystem_over_the_network()
+        {
+            this.Bddify();
+        }
+    }
+
 
     public class Deleting_A_Native_Directory : NativeSyncProviderSpec
     {
@@ -47,7 +94,7 @@ namespace Syncr.FileSystems.Native.Tests
 
         public void Given_a_directory_to_be_deleted()
         {
-            CurrentInstance = new NativeSyncProvider(MockFileSystem, new WindowsFileSystemOptions() { Path = "c:\\" });
+            CurrentInstance = CreateInstance(new WindowsFileSystemOptions() { Path = "c:\\" });
         }
 
         public void When_the_directory_is_deleted_from_native_filesystem()
@@ -117,7 +164,7 @@ namespace Syncr.FileSystems.Native.Tests
 
         public void Given_a_directory_to_be_deleted()
         {
-            CurrentInstance = new NativeSyncProvider(MockFileSystem, new WindowsFileSystemOptions() { Path = "c:\\" });
+            CurrentInstance = CreateInstance(new WindowsFileSystemOptions() { Path = "c:\\" });
         }
 
         public void When_the_directory_is_deleted_from_native_filesystem()
@@ -131,7 +178,7 @@ namespace Syncr.FileSystems.Native.Tests
         }
 
         [Fact]
-        public void Deletes_the_native_Directory()
+        public void Deletes_the_native_file()
         {
             this.Bddify();
         }

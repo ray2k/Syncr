@@ -35,8 +35,11 @@ namespace Syncr
             this.Destination = destination;
             this.Options = syncOptions;
             
-            _pollingTimer.Interval = syncOptions.PollingInterval.TotalMilliseconds;
+            _pollingTimer.Interval = syncOptions.PollingInterval.TotalMilliseconds;            
             _pollingTimer.Start();
+
+            if (Started != null)
+                Started(this, EventArgs.Empty);
         }
 
         public void Stop()
@@ -48,6 +51,9 @@ namespace Syncr
             {
                 Thread.SpinWait(20);
             }
+
+            if (Stopped != null)
+                Stopped(this, EventArgs.Empty);
         }
 
         public ISyncProvider Source { get; private set; }
@@ -79,7 +85,7 @@ namespace Syncr
 
                 if (this.Options.SyncDirection == SyncDirection.OneWay)
                 {
-                    var sourceToDestinationChangeSet = this.ChangeDetector.DetermineChangesToDestination(sourceEntries, destinationEntries, this.Options.ConflictBehavior);                    
+                    var sourceToDestinationChangeSet = this.ChangeDetector.DetermineChangesToDestination(sourceEntries, destinationEntries, this.Options.ConflictBehavior);
                     this.FileSystemUpdater.ApplyChangesWhile(this.Destination, sourceToDestinationChangeSet, () => _stopRequested);
                 }
                 else if (this.Options.SyncDirection == SyncDirection.TwoWay)
@@ -90,16 +96,27 @@ namespace Syncr
                     this.FileSystemUpdater.ApplyChangesWhile(this.Destination, sourceToDestinationChangeSet, () => _stopRequested);
                     this.FileSystemUpdater.ApplyChangesWhile(this.Source, destinationToSourceChangeSet, () => _stopRequested);
                 }
-
+            }
+            catch (Exception ex)
+            {
+                // TODO: probably pass exeption in IterationStarted event
+                Console.WriteLine(ex.Message);
+            }
+            finally
+            {
                 lock (_lockObject)
                 {
                     _syncInProgress = false;
                 }
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex.Message);
+
+                if (IterationCompleted != null)
+                    IterationCompleted(this, EventArgs.Empty);
             }
         }
+
+        public event EventHandler Started;
+        public event EventHandler Stopped;
+        public event EventHandler IterationStarted;
+        public event EventHandler IterationCompleted;
     }
 }

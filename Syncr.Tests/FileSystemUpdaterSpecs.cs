@@ -27,7 +27,7 @@ namespace Syncr.Tests
         bool creationUpdated = false;
         FileSystemUpdatedEventArgs raisedArgs = null;
 
-        public void Given_An_Out_Of_Date_FileSystem()
+        public void Given_an_out_of_date_filesystem_with_pending_file_creation()
         {
             FakeChanges.Clear();
             FakeChanges.Add(FileSystemChange.ForCreate(new FakeFileEntry() { Created = DateTime.Now.Date, Modified = DateTime.Now.Date }));
@@ -42,29 +42,29 @@ namespace Syncr.Tests
             MockFileSystem.Setup(p => p.Create(FakeChanges[0].Entry)).Returns(mockEntry.Object);
         }
 
-        public void When_Changes_Are_Applied()
+        public void When_changes_are_applied_to_filesystem()
         {
             var instance = new FileSystemUpdater();
             instance.FileSystemUpdated += (sender, args) => raisedArgs = args;
             instance.ApplyChangesWhile(this.MockFileSystem.Object, FakeChanges, () => false);
         }
 
-        public void Then_The_Entry_Pending_Creation_Should_Be_Created()
+        public void Then_the_missing_file_entry_should_be_created()
         {
             MockFileSystem.VerifyAll();
         }
 
-        public void And_Then_Its_CreationTime_Should_Be_Set()
+        public void And_Then_its_creationtime_should_be_set()
         {
             creationUpdated.ShouldBe(true);
         }
 
-        public void And_Then_Its_Modification_Time_Should_Be_Set()
+        public void And_Then_its_modification_time_should_be_set()
         {
             modificationUpdated.ShouldBe(true);
         }
 
-        public void And_Then_The_FileSystemUpdated_Event_Should_Be_Raised()
+        public void And_Then_the_filesystemupdated_event_should_be_raised()
         {
             raisedArgs.ShouldNotBe(null);
             raisedArgs.Entry.ShouldNotBe(null);
@@ -76,7 +76,7 @@ namespace Syncr.Tests
         }
 
         [Fact]
-        public void Entries_Pending_Creation_Should_Be_Created()
+        public void Missing_files_should_be_created_on_filesystem()
         {
             this.Bddify();
         }
@@ -84,25 +84,25 @@ namespace Syncr.Tests
 
     public class Updating_A_File_System_Requiring_File_Deletions : FileSystemUpdaterSpec
     {
-        public void Given_An_Out_Of_Date_FileSystem()
+        public void Given_a_filesystem_requiring_file_deletions()
         {
             FakeChanges.Clear();
             FakeChanges.Add(FileSystemChange.ForDelete(new FakeFileEntry() { Created = DateTime.Now.Date, Modified = DateTime.Now.Date }));
             MockFileSystem.Setup(p => p.Delete(FakeChanges[0].Entry));
         }
 
-        public void When_Changes_Are_Applied()
+        public void When_changeset_is_applied()
         {
             new FileSystemUpdater().ApplyChangesWhile(this.MockFileSystem.Object, FakeChanges, () => false);
         }
 
-        public void Then_The_Entry_Pending_Deletion_Should_Be_Deleted()
+        public void Then_entries_pending_deletion_should_be_deleted()
         {
             MockFileSystem.VerifyAll();
         }
 
         [Fact]
-        public void Entries_Pending_Deletion_Should_Be_Deleted()
+        public void Entries_pending_deletion_should_be_deleted_from_filesystem()
         {
             this.Bddify();
         }
@@ -110,7 +110,7 @@ namespace Syncr.Tests
 
     public class Updating_A_File_System_Requiring_Overwrites : FileSystemUpdaterSpec
     {
-        public void Given_An_Out_Of_Date_FileSystem()
+        public void Given_a_filesystem_with_pending_file_replacements()
         {
             FakeChanges.Clear();
             FakeChanges.Add(FileSystemChange.ForOverwrite(new FakeFileEntry() { Created = DateTime.Now.Date, Modified = DateTime.Now.Date }));
@@ -118,18 +118,18 @@ namespace Syncr.Tests
             MockFileSystem.Setup(p => p.Create(FakeChanges[0].Entry)).Returns(new FakeFileEntry());
         }
 
-        public void When_Changes_Are_Applied()
+        public void When_changeset_is_applied_to_filesystem()
         {
             new FileSystemUpdater().ApplyChangesWhile(this.MockFileSystem.Object, FakeChanges, () => false);
         }
 
-        public void Then_The_Entry_Pending_Overwriting_Should_Be_Overwritten()
+        public void Then_files_requiring_replacement_should_be_overwritten()
         {
             MockFileSystem.VerifyAll();
         }
 
         [Fact]
-        public void Entries_Pending_Overwrite_Should_Be_Overwritten()
+        public void Files_requiring_replacement_should_be_overwritten()
         {
             this.Bddify();
         }

@@ -51,6 +51,7 @@
     <Compile Include="IFileSystemUpdater.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SyncDirection.cs" />
+    <Compile Include="SyncProviderBase.cs" />
     <Compile Include="SyncronizationOptions.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

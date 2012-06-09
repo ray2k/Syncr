@@ -45,21 +45,31 @@ namespace Syncr.Tests
 
         public void When_Synced_One_Way()
         {
-            new FileSystemSynchronizer(MockChangeDetector.Object, MockUpdater.Object)
-                        .Start(MockSource.Object, MockDestination.Object,
-                                new SyncronizationOptions()
-                                {
-                                    ConflictBehavior = ConflictBehavior.Skip,
-                                    PollingInterval = TimeSpan.FromMilliseconds(10),
-                                    SyncDirection = SyncDirection.OneWay,
-                                    SearchOption = SearchOption.AllDirectories
-                                }
-                        );
+            var instance = new FileSystemSynchronizer(MockChangeDetector.Object, MockUpdater.Object);
+
+            bool iterationComplete = false;
+
+            instance.IterationCompleted += delegate(object sender, EventArgs args)
+            {
+                iterationComplete = true;
+            };
+
+            instance.Start(MockSource.Object, MockDestination.Object,
+                new SyncronizationOptions()
+                {
+                    ConflictBehavior = ConflictBehavior.Skip,
+                    PollingInterval = TimeSpan.FromMilliseconds(10),
+                    SyncDirection = SyncDirection.OneWay,
+                    SearchOption = SearchOption.AllDirectories
+                }
+            );
+
+            while (!iterationComplete)
+                Thread.SpinWait(10);
         }
 
         public void Then_the_changes_to_the_destination_file_system_should_be_detected()
         {
-            Thread.Sleep(200);
             MockChangeDetector.VerifyAll();
         }
 
@@ -105,21 +115,31 @@ namespace Syncr.Tests
 
         public void When_Synced_One_Way()
         {
-            new FileSystemSynchronizer(MockChangeDetector.Object, MockUpdater.Object)
-                        .Start(MockSource.Object, MockDestination.Object,
-                                new SyncronizationOptions()
-                                {
-                                    ConflictBehavior = ConflictBehavior.Skip,
-                                    PollingInterval = TimeSpan.FromMilliseconds(10),
-                                    SyncDirection = SyncDirection.TwoWay,
-                                    SearchOption = SearchOption.AllDirectories
-                                }
-                        );
+            var instance = new FileSystemSynchronizer(MockChangeDetector.Object, MockUpdater.Object);
+
+            bool iterationCompleted = false;
+
+            instance.IterationCompleted += delegate(object sender, EventArgs e)
+            {
+                iterationCompleted = true;
+            };
+            
+            instance.Start(MockSource.Object, MockDestination.Object,
+                new SyncronizationOptions()
+                {
+                    ConflictBehavior = ConflictBehavior.Skip,
+                    PollingInterval = TimeSpan.FromMilliseconds(10),
+                    SyncDirection = SyncDirection.TwoWay,
+                    SearchOption = SearchOption.AllDirectories
+                }
+            );
+
+            while (!iterationCompleted)
+                Thread.SpinWait(20);
         }
 
         public void Then_the_changes_to_the_destination_file_system_should_be_detected()
         {
-            Thread.Sleep(200);
             MockChangeDetector.VerifyAll();
         }
 

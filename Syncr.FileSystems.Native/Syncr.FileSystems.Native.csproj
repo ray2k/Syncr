@@ -42,6 +42,10 @@
     <Compile Include="Extensions.cs" />
     <Compile Include="IO\FileSystem.cs" />
     <Compile Include="IO\IFileSystem.cs" />
+    <Compile Include="IO\INetworkConnection.cs" />
+    <Compile Include="IO\INetworkConnectionFactory.cs" />
+    <Compile Include="IO\NetworkConnection.cs" />
+    <Compile Include="IO\NetworkConnectionFactory.cs" />
     <Compile Include="LinuxFileSystemOptions.cs" />
     <Compile Include="NativeDirectoryEntry.cs" />
     <Compile Include="NativeFileEntry.cs" />

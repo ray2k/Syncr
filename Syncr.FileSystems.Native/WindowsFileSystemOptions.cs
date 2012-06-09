@@ -18,11 +18,15 @@ namespace Syncr.FileSystems.Native
         public string Path { get; set; }
 
         [Category("Network Path")]
-        [Description("User name to use when accessing the remote file system")]
+        [Description("Name of the user account to access the remote file system")]
         public string UserName { get; set; }
 
         [Category("Network Path")]
-        [Description("Password to use when accessing the remote file system")]
+        [Description("Password for the user account to access the remote file system")]
         public string Password { get; set; }
+
+        [Category("Network Path")]
+        [Description("Domain of the user account to access to the remote file system")]
+        public string Domain { get; set; }
     }
 }

@@ -1,30 +1,33 @@
 ﻿using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Net;
 using Syncr.FileSystems.Native.IO;
 
 namespace Syncr.FileSystems.Native
 {
-    public class NativeSyncProvider : ISyncProvider
+    public sealed class NativeSyncProvider : SyncProviderBase
     {
-        protected string BaseDirectory { get; private set; }
-        protected string SourcePath { get; private set; }
-        protected string UserName { get; private set; }
-        protected string Password { get; private set; }
+        private string BaseDirectory { get; set; }        
+        private string UserName { get; set; }
+        private string Password { get; set; }
+        private string Domain { get; set; }
+        private INetworkConnection CurrentConnection { get; set; }
+        private INetworkConnectionFactory ConnectionFactory { get; set; }
+        private IFileSystem FileSystem { get;  set; }
 
-        protected IFileSystem FileSystem { get; private set; }
-
-        public NativeSyncProvider(IFileSystem fileSystem, WindowsFileSystemOptions options)
+        public NativeSyncProvider(IFileSystem fileSystem, INetworkConnectionFactory connectionFactory, WindowsFileSystemOptions options)
         {
             this.FileSystem = fileSystem;
-            this.SourcePath = options.Path;
+            this.ConnectionFactory = connectionFactory;
             this.UserName = options.UserName;
             this.Password = options.Password;
+            this.Domain = options.Domain;
             this.BaseDirectory = options.Path.WithTrailingPathSeparator();
         }
 
         public NativeSyncProvider(WindowsFileSystemOptions options)
-            : this(new FileSystem(), options)
+            : this(new FileSystem(), new NetworkConnectionFactory(), options)
         {   
         }
 
@@ -36,7 +39,6 @@ namespace Syncr.FileSystems.Native
         public NativeSyncProvider(IFileSystem fileSystem, LinuxFileSystemOptions options)
         {
             this.FileSystem = fileSystem;
-            this.SourcePath = options.Path;
             this.BaseDirectory = options.Path.WithTrailingPathSeparator();
         }
 
@@ -45,8 +47,9 @@ namespace Syncr.FileSystems.Native
             return fullPath.Substring(0, fullPath.Length - this.BaseDirectory.Length);
         }
 
-        public IEnumerable<FileSystemEntry> GetFileSystemEntries(SearchOption searchOption)
+        public override IEnumerable<FileSystemEntry> GetFileSystemEntries(SearchOption searchOption)
         {
+            Connect();
             var dirEntries = GetDirectoryEntries(searchOption);
             var fileEntries = GetFileEntries(searchOption);
 
@@ -83,8 +86,9 @@ namespace Syncr.FileSystems.Native
                      }).Cast<FileSystemEntry>().ToList();
         }
 
-        public FileSystemEntry Create(FileSystemEntry entry)
+        public override FileSystemEntry Create(FileSystemEntry entry)
         {
+            Connect();
             if (entry is FileEntry)
                 return CreateFile(entry as FileEntry);
             else
@@ -148,8 +152,9 @@ namespace Syncr.FileSystems.Native
             };
         }
 
-        public void Delete(FileSystemEntry entry)
+        public override void Delete(FileSystemEntry entry)
         {
+            Connect();
             var fullPath = Path.Combine(this.BaseDirectory, entry.RelativePath);
 
             var file = entry as FileEntry;                        
@@ -179,6 +184,24 @@ namespace Syncr.FileSystems.Native
                 this.FileSystem.Directory.Delete(fullPath);
         }
 
-        public string Id { get; set; }
+        protected override void Dispose(bool isDisposing)
+        {
+            if (this.CurrentConnection != null)
+                this.CurrentConnection.Dispose();
+        }
+
+        private void Connect()
+        {
+            // on linux OR on we dont have a UNC path
+            if (this.BaseDirectory.StartsWith("\\\\") == false || this.ConnectionFactory == null)
+                return;
+
+            // so we have a UNC base directory and ability to connect
+            if (this.CurrentConnection == null && this.UserName != null && this.Password != null)
+            {
+                this.CurrentConnection = this.ConnectionFactory.CreateConnection(this.BaseDirectory, this.UserName, this.Password, this.Domain);
+                this.CurrentConnection.Connect();
+            }
+        }
     }
 }

@@ -49,7 +49,7 @@ namespace Syncr.Tests
             }
 
             [Fact]
-            public void It_Should_Be_Included_In_Changeset()
+            public void Changeset_should_include_creation_of_missing_file()
             {
                 this.Bddify();
             }
@@ -59,7 +59,7 @@ namespace Syncr.Tests
         {
             IEnumerable<FileSystemChange> changeSet = null;
 
-            public void Given_A_Source_FileSystem_With_A_Conflicted_File_On_Destination()
+            public void Given_a_source_filesystem_with_a_file_smaller_than_destination()
             {
                 FakeSourceEntries.Add(
                     new FakeFileEntry() { RelativePath = "foo.txt", Size = 100, Name = "foo.txt" });
@@ -67,19 +67,19 @@ namespace Syncr.Tests
                     new FakeFileEntry() { RelativePath = "foo.txt", Size = 200, Name = "foo.txt" });
             }
 
-            public void When_Changes_Are_Detected_For_The_Destination_With_ConflictBehavior_Skip()
+            public void When_changes_to_destination_are_detected_withh_conflictbehavior_skip()
             {
                 changeSet = new FileSystemChangeDetector().DetermineChangesToDestination(this.FakeSourceEntries, this.FakeDestinationEntries, ConflictBehavior.Skip);
             }
 
-            public void Then_No_Change_For_The_Conflicting_File_Should_Be_In_The_Changeset()
+            public void Then_no_change_for_the_conflicted_file_should_be_in_the_changeset()
             {
                 changeSet.ShouldNotBe(null);
                 changeSet.Count().ShouldBe(0);
             }
 
             [Fact]
-            public void No_Change_For_The_Conflicting_File_Should_Be_In_The_Changeset()
+            public void No_change_for_the_conflicted_file_should_be_in_the_changeset()
             {
                 this.Bddify();
             }
@@ -111,7 +111,7 @@ namespace Syncr.Tests
             }
 
             [Fact]
-            public void A_Change_For_OVerwriting_The_Destination_Should_Be_In_Changeset()
+            public void Changeset_should_include_overwriting_destination_file_with_source()
             {
                 this.Bddify();
             }
@@ -151,7 +151,7 @@ namespace Syncr.Tests
         {
             IEnumerable<FileSystemChange> changeSet = null;
 
-            public void Given_A_Source_FileSystem_With_Conflicted_File_On_Destination()
+            public void Given_a_source_fileSystem_with_a_file_newer_than_destination()
             {
                 FakeSourceEntries.Add(
                     new FakeFileEntry() { RelativePath = "foo.txt", Size = 100, Name = "foo.txt", Created = DateTime.Now });
@@ -159,12 +159,12 @@ namespace Syncr.Tests
                     new FakeFileEntry() { RelativePath = "foo.txt", Size = 200, Name = "foo.txt", Created = DateTime.Now.AddDays(-1.0) });
             }
             
-            public void When_Changes_Are_Detected_For_Destination_Using_TakeNewest()
+            public void When_changes_to_destination_are_Detected_with_conflictbehavior_takenewest()
             {
                 changeSet = new FileSystemChangeDetector().DetermineChangesToDestination(this.FakeSourceEntries, this.FakeDestinationEntries, ConflictBehavior.TakeNewest);
             }
 
-            public void Then_A_Change_For_Overwriting_The_Conflicted_File_On_Destination_Should_Be_Included()
+            public void Then_changetset_should_include_overwriting_destination_file()
             {
                 changeSet.ShouldNotBe(null);
                 changeSet.Count().ShouldBe(1);
@@ -173,7 +173,7 @@ namespace Syncr.Tests
             }
 
             [Fact]
-            public void A_Change_For_Overwriting_The_Conflicted_File_On_Destination_Should_Be_Included()
+            public void Changetset_should_include_overwriting_destination_file()
             {
                 this.Bddify();
             }
@@ -205,7 +205,7 @@ namespace Syncr.Tests
             }
 
             [Fact]
-            public void It_Should_Be_Included_In_Changeset()
+            public void Changeset_should_include_creation_of_missing_directory()
             {
                 this.Bddify();
             }
@@ -245,7 +245,7 @@ namespace Syncr.Tests
         {
             IEnumerable<FileSystemChange> changeSet = null;
 
-            public void Given_A_Destination_FIleSystem_With_Conflicted_File_On_Source()
+            public void Given_a_destination_fIlesystem_with_a_file_bigger_than_source()
             {
                 FakeSourceEntries.Add(
                     new FakeFileEntry() { RelativePath = "foo.txt", Size = 100, Name = "foo.txt" });
@@ -253,12 +253,12 @@ namespace Syncr.Tests
                     new FakeFileEntry() { RelativePath = "foo.txt", Size = 200, Name = "foo.txt" });
             }
 
-            public void When_Changes_Are_Detected_For_Source()
+            public void When_changes_to_source_are_detected()
             {
                 changeSet = new FileSystemChangeDetector().DetermineChangesToDestination(this.FakeSourceEntries, this.FakeDestinationEntries, ConflictBehavior.TakeSource);
             }
 
-            public void Then_A_Change_For_OVerwriting_The_Source_Should_Be_In_Changeset()
+            public void Then_a_change_for_overwriting_source_file_should_be_in_changeset()
             {
                 changeSet.ShouldNotBe(null);
                 changeSet.Count().ShouldBe(1);
@@ -267,7 +267,7 @@ namespace Syncr.Tests
             }
 
             [Fact]
-            public void A_Change_For_OVerwriting_The_Source_Should_Be_In_Changeset()
+            public void Changeset_should_include_overwriting_destination_file_with_source()
             {
                 this.Bddify();
             }
@@ -303,11 +303,11 @@ namespace Syncr.Tests
             }
         }
 
-        public class When_A_Conflicted_File_Is_Newer_On_Destination_Than_Source_With_TakeNewest : FileDetectionSpec
+        public class When_A_File_Is_Newer_On_Destination_Than_Source_With_TakeNewest : FileDetectionSpec
         {
             IEnumerable<FileSystemChange> changeSet = null;
 
-            public void Given_A_Destination_FileSystem_With_Conflicted_File_On_Source()
+            public void Given_a_destination_filesystem_With_conflicted_file_older_than_source()
             {
                 FakeSourceEntries.Add(
                     new FakeFileEntry() { RelativePath = "foo.txt", Size = 100, Name = "foo.txt", Created = DateTime.Now });
@@ -329,7 +329,7 @@ namespace Syncr.Tests
             }
 
             [Fact]
-            public void A_Change_For_Overwriting_The_Conflicted_File_On_Source_Should_Be_Included()
+            public void Changeset_should_include_overwriting_older_file_on_destination()
             {
                 this.Bddify();
             }
