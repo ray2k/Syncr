@@ -11,7 +11,7 @@ namespace Syncr
         {
         }
 
-        internal FileSystemUpdateFailedEventArgs(IFileSystem fileSystem, FileSystemChange change, Exception exception)
+        internal FileSystemUpdateFailedEventArgs(ISyncProvider fileSystem, FileSystemChange change, Exception exception)
         {
             this.FileSystem = fileSystem;
             this.Entry = change.Entry;
@@ -21,7 +21,7 @@ namespace Syncr
 
         public FileSystemEntry Entry { get; private set; }
         public FileSystemChangeType ChangeType { get; private set; }
-        public IFileSystem FileSystem { get; private set; }
+        public ISyncProvider FileSystem { get; private set; }
         public Exception Exception { get; private set; }
     }
 }

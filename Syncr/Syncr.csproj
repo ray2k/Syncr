@@ -44,9 +44,9 @@
     <Compile Include="FileSystemUpdatedEventArgs.cs" />
     <Compile Include="FileSystemUpdateFailedEventArgs.cs" />
     <Compile Include="FileSystemUpdater.cs" />
-    <Compile Include="IFileSystem.cs" />
+    <Compile Include="ISyncProvider.cs" />
     <Compile Include="IFileSystemChangeDetector.cs" />
-    <Compile Include="IFileSystemProvider.cs" />
+    <Compile Include="ISyncProviderFactory.cs" />
     <Compile Include="IFileSystemSynchonizer.cs" />
     <Compile Include="IFileSystemUpdater.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

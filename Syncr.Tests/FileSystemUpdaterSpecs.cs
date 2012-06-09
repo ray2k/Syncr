@@ -10,12 +10,12 @@ namespace Syncr.Tests
 {
     public abstract class FileSystemUpdaterSpec
     {
-        public Mock<IFileSystem> MockFileSystem;
+        public Mock<ISyncProvider> MockFileSystem;
         public List<FileSystemChange> FakeChanges;
 
         public FileSystemUpdaterSpec()
         {
-            MockFileSystem = new Mock<IFileSystem>();
+            MockFileSystem = new Mock<ISyncProvider>();
             FakeChanges = new List<FileSystemChange>();
         }
     }

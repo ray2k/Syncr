@@ -1,21 +1,28 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.IO.Abstractions;
 using System.Linq;
 using System.Text;
 using Syncr;
 
 namespace Syncr.FileSystems.Native
 {
-    public class NativeFileSystem : IFileSystem
+    public class NativeSyncProvider : ISyncProvider
     {
         protected string BaseDirectory { get; private set; }
         protected WindowsFileSystemOptions Options { get; private set; }
+        protected IFileSystem FileSystem { get; private set; }
 
-        public NativeFileSystem(WindowsFileSystemOptions options)
+        public NativeSyncProvider(IFileSystem fileSystem, WindowsFileSystemOptions options)
         {
             this.Options = options;
             this.BaseDirectory = options.Path.WithTrailingPathSeparator();
+        }
+
+        public NativeSyncProvider(WindowsFileSystemOptions options)
+            : this(new FileSystem(), options)
+        {   
         }
 
         private string GetRelativePath(string fullPath)
@@ -33,9 +40,9 @@ namespace Syncr.FileSystems.Native
 
         private IList<FileSystemEntry> GetDirectoryEntries(SearchOption searchOption)
         {
-            return (from d in Directory.GetDirectories(this.BaseDirectory, "*", searchOption)
+            return (from d in this.FileSystem.Directory.GetDirectories(this.BaseDirectory, "*", searchOption)
                               let dirInfo = new DirectoryInfo(d)
-                              select new NativeDirectoryEntry()
+                              select new NativeDirectoryEntry(this.FileSystem.FileInfo)
                               {
                                   BaseDirectory = this.BaseDirectory,
                                   Created = dirInfo.CreationTimeUtc,
@@ -47,9 +54,9 @@ namespace Syncr.FileSystems.Native
 
         private IList<FileSystemEntry> GetFileEntries(SearchOption searchOption)
         {
-            return  (from f in Directory.GetFiles(this.BaseDirectory, "*", searchOption)
+            return  (from f in this.FileSystem.Directory.GetFiles(this.BaseDirectory, "*", searchOption)
                      let fInfo = new FileInfo(f)
-                     select new NativeFileEntry()
+                     select new NativeFileEntry(this.FileSystem.FileInfo)
                      {
                          BaseDirectory = this.BaseDirectory,
                          Created = fInfo.CreationTimeUtc,
@@ -72,11 +79,11 @@ namespace Syncr.FileSystems.Native
         {
             var fullPath = Path.Combine(this.BaseDirectory, entry.RelativePath);
 
-            if (File.Exists(fullPath))
-                File.Delete(fullPath);
+            if (this.FileSystem.File.Exists(fullPath))
+                this.FileSystem.File.Delete(fullPath);
             
             using (var destStream = entry.Open())
-            using (var sourceStream = File.Create(fullPath))
+            using (var sourceStream = this.FileSystem.File.Create(fullPath))
             {
                 byte[] buffer = new byte[1024];
                 int offset = 0;
@@ -97,9 +104,9 @@ namespace Syncr.FileSystems.Native
                 sourceStream.Flush();
             }
 
-            var info = new FileInfo(fullPath);
+            var info = this.FileSystem.FileInfo.FromFileName(fullPath);
 
-            return new NativeFileEntry()
+            return new NativeFileEntry(this.FileSystem.FileInfo)
             {
                 BaseDirectory = this.BaseDirectory,
                 Created = info.CreationTimeUtc,
@@ -111,12 +118,12 @@ namespace Syncr.FileSystems.Native
         private NativeDirectoryEntry CreateDirectory(DirectoryEntry entry)
         {
             var fullPath = Path.Combine(this.BaseDirectory, entry.RelativePath);
-            if (Directory.Exists(fullPath) == false)
-                Directory.CreateDirectory(fullPath);
+            if (this.FileSystem.Directory.Exists(fullPath) == false)
+                this.FileSystem.Directory.CreateDirectory(fullPath);
 
-            var info = new DirectoryInfo(fullPath);
+            var info = this.FileSystem.FileInfo.FromFileName(fullPath);
 
-            return new NativeDirectoryEntry()
+            return new NativeDirectoryEntry(this.FileSystem.FileInfo)
             {
                 BaseDirectory = this.BaseDirectory,
                 Created = info.CreationTimeUtc,
@@ -144,16 +151,16 @@ namespace Syncr.FileSystems.Native
         {
             var fullPath = Path.Combine(this.BaseDirectory, entry.RelativePath);
 
-            if (File.Exists(fullPath))
-                File.Delete(fullPath);
+            if (this.FileSystem.File.Exists(fullPath))
+                this.FileSystem.File.Delete(fullPath);
         }
 
         private void DeleteDirectory(DirectoryEntry entry)
         {
             var fullPath = Path.Combine(this.BaseDirectory, entry.RelativePath);
 
-            if (Directory.Exists(fullPath))
-                Directory.Delete(fullPath);
+            if (this.FileSystem.Directory.Exists(fullPath))
+                this.FileSystem.Directory.Delete(fullPath);
         }
 
         public string Id { get; set; }

@@ -29,7 +29,7 @@ namespace Syncr
             _pollingTimer.Elapsed += OnTimerTick;            
         }
 
-        public void Start(IFileSystem source, IFileSystem destination, SyncronizationOptions syncOptions)
+        public void Start(ISyncProvider source, ISyncProvider destination, SyncronizationOptions syncOptions)
         {
             this.Source = source;
             this.Destination = destination;
@@ -50,8 +50,8 @@ namespace Syncr
             }
         }
 
-        public IFileSystem Source { get; private set; }
-        public IFileSystem Destination { get; private set; }
+        public ISyncProvider Source { get; private set; }
+        public ISyncProvider Destination { get; private set; }
         public IFileSystemChangeDetector ChangeDetector { get; private set; }
         public IFileSystemUpdater FileSystemUpdater { get; private set; }
         public SyncronizationOptions Options { get; private set; }

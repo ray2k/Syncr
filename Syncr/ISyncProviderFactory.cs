@@ -5,9 +5,9 @@ using System.Text;
 
 namespace Syncr
 {
-    public interface IFileSystemProvider
+    public interface ISyncProviderFactory
     {
-        IFileSystem CreateFileSystem(object options);
+        ISyncProvider CreateFileSystem(object options);
         object CreateDefaultOptions();
         string Name { get; }
         string Description { get; }

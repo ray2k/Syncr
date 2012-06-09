@@ -10,15 +10,15 @@ namespace Syncr.Tests
 {
     public abstract class FileDetectionSpec
     {
-        public Mock<IFileSystem> MockSource;
-        public Mock<IFileSystem> MockDestination;
+        public Mock<ISyncProvider> MockSource;
+        public Mock<ISyncProvider> MockDestination;
         public List<FileSystemEntry> FakeSourceEntries;
         public List<FileSystemEntry> FakeDestinationEntries;
 
         public FileDetectionSpec()
         {
-            MockSource = new Mock<IFileSystem>();
-            MockDestination = new Mock<IFileSystem>();
+            MockSource = new Mock<ISyncProvider>();
+            MockDestination = new Mock<ISyncProvider>();
             FakeSourceEntries = new List<FileSystemEntry>();
             FakeDestinationEntries = new List<FileSystemEntry>();
         }

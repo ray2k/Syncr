@@ -11,7 +11,7 @@ namespace Syncr
         {
         }
 
-        internal FileSystemUpdatedEventArgs(IFileSystem fileSystem, FileSystemChange change)
+        internal FileSystemUpdatedEventArgs(ISyncProvider fileSystem, FileSystemChange change)
         {
             this.FileSystem = fileSystem;
             this.Entry = change.Entry;
@@ -20,6 +20,6 @@ namespace Syncr
 
         public FileSystemEntry Entry { get; private set; }
         public FileSystemChangeType ChangeType { get; private set; }
-        public IFileSystem FileSystem { get; private set; }        
+        public ISyncProvider FileSystem { get; private set; }        
     }
 }

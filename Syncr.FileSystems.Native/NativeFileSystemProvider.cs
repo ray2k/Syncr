@@ -6,15 +6,15 @@ using Syncr;
 
 namespace Syncr.FileSystems.Native
 {
-    public class NativeFileSystemProvider : IFileSystemProvider
+    public class NativeFileSystemProvider : ISyncProviderFactory
     {
-        public IFileSystem CreateFileSystem(object options)
+        public ISyncProvider CreateFileSystem(object options)
         {
             var nfso = options as WindowsFileSystemOptions;
             if (nfso == null)
                 throw new InvalidOperationException("Expected NativeFileSystemOptions");
 
-            return new NativeFileSystem(nfso);
+            return new NativeSyncProvider(nfso);
         }
 
         public object CreateDefaultOptions()

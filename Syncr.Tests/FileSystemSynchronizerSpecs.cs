@@ -10,15 +10,15 @@ namespace Syncr.Tests
 {
     public abstract class FileSystemSynchronizerSpec
     {
-        public Mock<IFileSystem> MockSource;
-        public Mock<IFileSystem> MockDestination;
+        public Mock<ISyncProvider> MockSource;
+        public Mock<ISyncProvider> MockDestination;
         public Mock<IFileSystemChangeDetector> MockChangeDetector;
         public Mock<IFileSystemUpdater> MockUpdater;        
 
         public FileSystemSynchronizerSpec()
         {
-            MockSource = new Mock<IFileSystem>();
-            MockDestination = new Mock<IFileSystem>();
+            MockSource = new Mock<ISyncProvider>();
+            MockDestination = new Mock<ISyncProvider>();
             MockChangeDetector = new Mock<IFileSystemChangeDetector>();
             MockUpdater = new Mock<IFileSystemUpdater>();
         }

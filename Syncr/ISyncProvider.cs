@@ -6,7 +6,7 @@ using System.Text;
 
 namespace Syncr
 {
-    public interface IFileSystem
+    public interface ISyncProvider
     {
         IEnumerable<FileSystemEntry> GetFileSystemEntries(SearchOption seachOption);
         FileSystemEntry Create(FileSystemEntry entry);

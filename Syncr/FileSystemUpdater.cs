@@ -7,7 +7,7 @@ namespace Syncr
 {
     public class FileSystemUpdater : IFileSystemUpdater
     {
-        public void ApplyChangesWhile(IFileSystem fileSystem, IEnumerable<FileSystemChange> changes, Func<bool> stopCheck)
+        public void ApplyChangesWhile(ISyncProvider fileSystem, IEnumerable<FileSystemChange> changes, Func<bool> stopCheck)
         {
             foreach (var change in changes)
             {
@@ -47,13 +47,13 @@ namespace Syncr
             }
         }
 
-        private void NotifyFileSystemUpdateFailed(IFileSystem fileSystem, FileSystemChange change, Exception ex)
+        private void NotifyFileSystemUpdateFailed(ISyncProvider fileSystem, FileSystemChange change, Exception ex)
         {
             if (FileSystemUpdateFailed != null)
                 FileSystemUpdateFailed(this, new FileSystemUpdateFailedEventArgs(fileSystem, change, ex));     
         }
 
-        private void NotifyFileSystemUpdated(IFileSystem fileSystem, FileSystemChange change)
+        private void NotifyFileSystemUpdated(ISyncProvider fileSystem, FileSystemChange change)
         {
             if (FileSystemUpdated != null)
                 FileSystemUpdated(this, new FileSystemUpdatedEventArgs(fileSystem, change));                

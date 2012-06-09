@@ -7,10 +7,10 @@ namespace Syncr
 {
     public interface IFileSystemSynchronizer
     {
-        void Start(IFileSystem localTarget, IFileSystem remoteSource, SyncronizationOptions options);
+        void Start(ISyncProvider localTarget, ISyncProvider remoteSource, SyncronizationOptions options);
         void Stop();
-        IFileSystem Source { get; }
-        IFileSystem Destination { get; }
+        ISyncProvider Source { get; }
+        ISyncProvider Destination { get; }
         SyncronizationOptions Options { get; }
         event EventHandler<FileSystemUpdatedEventArgs> FileSystemUpdated;
     }
