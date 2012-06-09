@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.IO.Abstractions;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -9,16 +8,18 @@ using Moq;
 using Xunit;
 using Shouldly;
 using Bddify;
+using SystemWrapper.IO;
+using SystemWrapper;
 
 namespace Syncr.FileSystems.Native.Tests
 {
     public abstract class NativeFileEntrySpec
     {
-        public Mock<FileInfoBase> MockFileInfo { get; set; }
+        public Mock<IFileInfoWrap> MockFileInfo { get; set; }
 
         public NativeFileEntrySpec()
         {
-            this.MockFileInfo = new Mock<FileInfoBase>();
+            this.MockFileInfo = new Mock<IFileInfoWrap>();
         }
 
         protected NativeFileEntry CurrentInstance { get; set; }
@@ -30,7 +31,10 @@ namespace Syncr.FileSystems.Native.Tests
 
         public void Context()
         {
-            MockFileInfo.Setup(p => p.Open(System.IO.FileMode.Open, System.IO.FileAccess.Read, System.IO.FileShare.Read)).Returns(new MemoryStream());
+            var mockStreamWrap = new Mock<IFileStreamWrap>();
+            mockStreamWrap.SetupGet(p => p.StreamInstance).Returns(new MemoryStream());
+
+            MockFileInfo.Setup(p => p.Open(FileMode.Open, FileAccess.Read, FileShare.Read)).Returns(mockStreamWrap.Object);
         }
 
         public void Given_a_native_FileEntry()
@@ -67,7 +71,7 @@ namespace Syncr.FileSystems.Native.Tests
     {
         public void Context()
         {
-            MockFileInfo.SetupSet(p => p.CreationTimeUtc = DateTime.Now.Date);
+            MockFileInfo.SetupSet(p => p.CreationTimeUtc = It.Is<DateTimeWrap>(w => w.DateTimeInstance == DateTime.Now.Date));
         }
 
         public void Given_a_native_FileEntry()
@@ -102,7 +106,7 @@ namespace Syncr.FileSystems.Native.Tests
     {
         public void Context()
         {
-            MockFileInfo.SetupSet(p => p.LastWriteTimeUtc = DateTime.Now.Date);
+            MockFileInfo.SetupSet(p => p.LastWriteTimeUtc = It.Is<DateTimeWrap>(w => w.DateTimeInstance == DateTime.Now.Date));
         }
 
         public void Given_a_native_FileEntry()

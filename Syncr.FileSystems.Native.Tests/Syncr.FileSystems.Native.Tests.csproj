@@ -44,17 +44,18 @@
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="Microsoft.CSharp" />
-    <Reference Include="System.IO.Abstractions, Version=1.4.0.24, Culture=neutral, PublicKeyToken=d480b5b72fb413da, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\System.IO.Abstractions.1.4.0.24\lib\net35\System.IO.Abstractions.dll</HintPath>
-    </Reference>
     <Reference Include="System.Xml" />
+    <Reference Include="SystemWrapper">
+      <HintPath>..\packages\SystemWrapper.0.4\lib\SystemWrapper.dll</HintPath>
+    </Reference>
     <Reference Include="xunit">
       <HintPath>..\packages\xunit.1.9.0.1566\lib\xunit.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="FakeDirectoryEntry.cs" />
     <Compile Include="FakeFileEntry.cs" />
+    <Compile Include="IO\MockFileSystem.cs" />
     <Compile Include="NativeDirectoryInfoSpecs.cs" />
     <Compile Include="NativeFileEntrySpecs.cs" />
     <Compile Include="NativeSyncProviderSpecs.cs" />

@@ -1,10 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.IO;
-using System.IO.Abstractions;
 using System.Linq;
-using System.Text;
-using Syncr;
+using Syncr.FileSystems.Native.IO;
 
 namespace Syncr.FileSystems.Native
 {
@@ -45,7 +42,7 @@ namespace Syncr.FileSystems.Native
 
         private string GetRelativePath(string fullPath)
         {
-            return fullPath.Replace(this.BaseDirectory, string.Empty);
+            return fullPath.Substring(0, fullPath.Length - this.BaseDirectory.Length);
         }
 
         public IEnumerable<FileSystemEntry> GetFileSystemEntries(SearchOption searchOption)
@@ -60,12 +57,12 @@ namespace Syncr.FileSystems.Native
         {
             var directories = this.FileSystem.Directory.GetDirectories(this.BaseDirectory, "*", searchOption);
             return (from d in directories
-                    let dirInfo = this.FileSystem.FileInfo.FromFileName(d)
+                    let dirInfo = this.FileSystem.GetDirectoryInfo(d)
                     select new NativeDirectoryEntry(dirInfo)
                     {
                         BaseDirectory = this.BaseDirectory,
-                        Created = dirInfo.CreationTimeUtc,
-                        Modified = dirInfo.LastWriteTimeUtc,
+                        Created = dirInfo.CreationTimeUtc.DateTimeInstance,
+                        Modified = dirInfo.LastWriteTimeUtc.DateTimeInstance,
                         Name = dirInfo.Name,
                         RelativePath = GetRelativePath(dirInfo.FullName)
                     }).Cast<FileSystemEntry>().ToList();
@@ -74,12 +71,12 @@ namespace Syncr.FileSystems.Native
         private IList<FileSystemEntry> GetFileEntries(SearchOption searchOption)
         {
             return  (from f in this.FileSystem.Directory.GetFiles(this.BaseDirectory, "*", searchOption)
-                     let fInfo = this.FileSystem.FileInfo.FromFileName(f)
+                     let fInfo = this.FileSystem.GetFileInfo(f)
                      select new NativeFileEntry(fInfo)
                      {
                          BaseDirectory = this.BaseDirectory,
-                         Created = fInfo.CreationTimeUtc,
-                         Modified = fInfo.LastWriteTimeUtc,
+                         Created = fInfo.CreationTimeUtc.DateTimeInstance,
+                         Modified = fInfo.LastWriteTimeUtc.DateTimeInstance,
                          Name = fInfo.Name,
                          RelativePath = GetRelativePath(fInfo.FullName),
                          Size = fInfo.Length
@@ -102,7 +99,7 @@ namespace Syncr.FileSystems.Native
                 this.FileSystem.File.Delete(fullPath);
             
             using (var destStream = entry.Open())
-            using (var sourceStream = this.FileSystem.File.Create(fullPath))
+            using (var sourceStream = this.FileSystem.File.Create(fullPath).StreamInstance)
             {
                 byte[] buffer = new byte[1024];
                 int offset = 0;
@@ -123,13 +120,13 @@ namespace Syncr.FileSystems.Native
                 sourceStream.Flush();
             }
 
-            var info = this.FileSystem.FileInfo.FromFileName(fullPath);
+            var info = this.FileSystem.GetFileInfo(fullPath);
 
             return new NativeFileEntry(info)
             {
                 BaseDirectory = this.BaseDirectory,
-                Created = info.CreationTimeUtc,
-                Modified = info.LastWriteTimeUtc,
+                Created = info.CreationTimeUtc.DateTimeInstance,
+                Modified = info.LastWriteTimeUtc.DateTimeInstance,
                 RelativePath = entry.RelativePath
             };
         }        
@@ -140,13 +137,13 @@ namespace Syncr.FileSystems.Native
             if (this.FileSystem.Directory.Exists(fullPath) == false)
                 this.FileSystem.Directory.CreateDirectory(fullPath);
 
-            var info = this.FileSystem.FileInfo.FromFileName(fullPath);
+            var info = this.FileSystem.GetDirectoryInfo(fullPath);
 
             return new NativeDirectoryEntry(info)
             {
                 BaseDirectory = this.BaseDirectory,
-                Created = info.CreationTimeUtc,
-                Modified = info.LastWriteTimeUtc,
+                Created = info.CreationTimeUtc.DateTimeInstance,
+                Modified = info.LastWriteTimeUtc.DateTimeInstance,
                 RelativePath = entry.RelativePath
             };
         }

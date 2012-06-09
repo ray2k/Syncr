@@ -1,22 +1,23 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO.Abstractions;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Moq;
 using Xunit;
 using Bddify;
+using SystemWrapper.IO;
+using SystemWrapper;
 
 namespace Syncr.FileSystems.Native.Tests
 {
     public abstract class NativeDirectoryInfoSpec
     {
-        public Mock<FileInfoBase> MockDirectoryInfo { get; set; }
+        public Mock<IDirectoryInfoWrap> MockDirectoryInfo { get; set; }
 
         public NativeDirectoryInfoSpec()
         {
-            this.MockDirectoryInfo = new Mock<FileInfoBase>();
+            this.MockDirectoryInfo = new Mock<IDirectoryInfoWrap>();
         }
 
         protected NativeDirectoryEntry CurrentInstance { get; set; }
@@ -26,7 +27,7 @@ namespace Syncr.FileSystems.Native.Tests
     {
         public void Context()
         {
-            MockDirectoryInfo.SetupSet(p => p.CreationTimeUtc = DateTime.Now.Date);
+            MockDirectoryInfo.SetupSet(p => p.CreationTimeUtc = It.Is<DateTimeWrap>(w => w.DateTimeInstance == DateTime.Now.Date));
         }
 
         public void Given_a_native_DirectoryEntry()
@@ -60,7 +61,7 @@ namespace Syncr.FileSystems.Native.Tests
     {
         public void Context()
         {
-            MockDirectoryInfo.SetupSet(p => p.LastWriteTimeUtc = DateTime.Now.Date);
+            MockDirectoryInfo.SetupSet(p => p.LastWriteTimeUtc = It.Is<DateTimeWrap>(w => w.DateTimeInstance == DateTime.Now.Date));
         }
 
         public void Given_a_native_DirectoryEntry()

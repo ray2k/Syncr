@@ -1,29 +1,25 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
-using System.IO.Abstractions;
-using System.Linq;
-using System.Text;
-using Syncr;
+using SystemWrapper;
+using SystemWrapper.IO;
 
 namespace Syncr.FileSystems.Native
 {
     public sealed class NativeFileEntry : FileEntry
     {
-        private FileInfoBase FileInfo { get; set; }
+        private IFileInfoWrap FileInfo { get; set; }
         
         public string BaseDirectory { get; set; }
 
-        public NativeFileEntry(FileInfoBase fileInfo)
+        public NativeFileEntry(IFileInfoWrap fileInfo)
         {
             this.FileInfo = fileInfo;
         }       
 
         public override System.IO.Stream Open()
         {
-            string fullPath = Path.Combine(this.BaseDirectory, this.RelativePath);
-
-            return this.FileInfo.Open(FileMode.Open, FileAccess.Read, FileShare.Read);
+            string fullPath = Path.Combine(this.BaseDirectory, this.RelativePath);            
+            return this.FileInfo.Open(FileMode.Open, FileAccess.Read, FileShare.Read).StreamInstance;
         }
 
         public override bool CanWriteCreationTime
@@ -39,14 +35,13 @@ namespace Syncr.FileSystems.Native
         protected override void WriteCreationTime(DateTime created)
         {
             string fullPath = Path.Combine(this.BaseDirectory, this.RelativePath);
-
-            this.FileInfo.CreationTimeUtc = created;
+            this.FileInfo.CreationTimeUtc = new DateTimeWrap(created);
         }
 
         protected override void WriteModificationTime(DateTime modified)
         {
             string fullPath = Path.Combine(this.BaseDirectory, this.RelativePath);
-            this.FileInfo.LastWriteTimeUtc = modified;
+            this.FileInfo.LastWriteTimeUtc = new DateTimeWrap(modified);
         }
     }
 }

@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO.Abstractions;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -9,85 +8,182 @@ using Xunit;
 using Shouldly;
 using Bddify;
 using System.IO;
+using Syncr.FileSystems.Native.IO;
+using Syncr.FileSystems.Native.Tests.IO;
+using SystemWrapper.IO;
+using SystemWrapper;
 
 namespace Syncr.FileSystems.Native.Tests
 {
     public abstract class NativeSyncProviderSpec
     {
-        public Mock<IFileSystem> MockFileSystem;
+        public MockFileSystem MockFileSystem;
 
         public NativeSyncProviderSpec()
         {
-            MockFileSystem = new Mock<IFileSystem>();
+            MockFileSystem = new MockFileSystem();
         }
 
         protected NativeSyncProvider CreateInstance(LinuxFileSystemOptions options)
         {
-            return new NativeSyncProvider(MockFileSystem.Object, options);
+            return new NativeSyncProvider(MockFileSystem, options);
         }
 
         protected NativeSyncProvider CreateInstance(WindowsFileSystemOptions options)
         {
-            return new NativeSyncProvider(MockFileSystem.Object, options);
+            return new NativeSyncProvider(MockFileSystem, options);
         }
 
         protected NativeSyncProvider CurrentInstance { get; set; }
     }
 
-    // TODO: creating a directory
-    // deleting a directory
-    // deleting a file
-
-    public class Creating_A_Native_File : NativeSyncProviderSpec
+    public class Deleting_A_Native_Directory : NativeSyncProviderSpec
     {
-        FakeFileEntry FakeFile;
-        byte[] fakeContents = Guid.NewGuid().ToByteArray();
-        FileSystemEntry CreatedFile;
-        MemoryStream CreatedStream = new MemoryStream();
+        public void Context()
+        {
+            MockFileSystem.MockDirectory.Setup(p => p.Exists("c:\\somedir")).Returns(true);
+            MockFileSystem.MockDirectory.Setup(p => p.Delete("c:\\somedir"));
+        }
 
-        Mock<FileBase> MockFile = new Mock<FileBase>();
-        Mock<IFileInfoFactory> MockFileInfoFactory = new Mock<IFileInfoFactory>();
-        Mock<FileInfoBase> MockFileInfo = new Mock<FileInfoBase>();
+        public void Given_a_directory_to_be_deleted()
+        {
+            CurrentInstance = new NativeSyncProvider(MockFileSystem, new WindowsFileSystemOptions() { Path = "c:\\" });
+        }
+
+        public void When_the_directory_is_deleted_from_native_filesystem()
+        {
+            CurrentInstance.Delete(new FakeDirectoryEntry() { RelativePath = "somedir" });
+        }
+
+        public void Then_it_is_removed_from_the_filesystem()
+        {
+            MockFileSystem.VerifyAll();
+        }
+
+        [Fact]
+        public void Deletes_the_native_Directory()
+        {
+            this.Bddify();
+        }
+    }
+
+    public class Creating_A_Native_Directory : NativeSyncProviderSpec
+    {
+        protected Mock<IDirectoryInfoWrap> MockDirectoryInfo;
+        protected FileSystemEntry CreatedEntry;
 
         public void Context()
         {
-            MockFileSystem.SetupGet(p => p.File).Returns(MockFile.Object);
-            MockFileSystem.SetupGet(p => p.FileInfo).Returns(MockFileInfoFactory.Object);
+            MockDirectoryInfo = new Mock<IDirectoryInfoWrap>();
+            MockDirectoryInfo.SetupGet(p => p.CreationTimeUtc).Returns(new DateTimeWrap(DateTime.Now.Date));
+            MockDirectoryInfo.SetupGet(p => p.LastWriteTimeUtc).Returns(new DateTimeWrap(DateTime.Now.Date));
+            MockFileSystem.AddDirectoryInfo("c:\\somedir", MockDirectoryInfo.Object);
 
-            MockFile.Setup(p => p.Exists("c:\\somefile.txt")).Returns(false);
-            MockFile.Setup(p => p.Create("c:\\somefile.txt")).Returns(CreatedStream);
-                       
-            MockFileInfo.SetupGet(p => p.CreationTimeUtc).Returns(DateTime.Now.Date);
-            MockFileInfo.SetupGet(p => p.LastWriteTimeUtc).Returns(DateTime.Now.Date);
-
-            MockFileInfoFactory.Setup(p => p.FromFileName("c:\\somefile.txt")).Returns(MockFileInfo.Object);
+            MockFileSystem.MockDirectory.Setup(p => p.Exists("c:\\somedir")).Returns(false);
+            MockFileSystem.MockDirectory.Setup(p => p.CreateDirectory("c:\\somedir")).Returns(new Mock<IDirectoryInfoWrap>().Object);
         }
 
-        public void Given_a_file_to_be_written()
+        public void Given_a_directory_to_be_created()
         {
-            fakeContents = Guid.NewGuid().ToByteArray();
-            FakeFile = new FakeFileEntry(new MemoryStream(fakeContents) { Position = 0 })
-            {
-                RelativePath = "somefile.txt"
-            };
+            CurrentInstance = CreateInstance(new WindowsFileSystemOptions() { Path = "c:\\" });
         }
 
         public void When_it_is_created_on_native_filesystem()
         {
-            CurrentInstance = CreateInstance(new WindowsFileSystemOptions() { Path = "c:\\" });
-            CreatedFile = CurrentInstance.Create(FakeFile);
+            CreatedEntry = CurrentInstance.Create(
+                new FakeDirectoryEntry() { RelativePath = "somedir" });
         }
 
-        public void Then_the_file_contents_are_written_to_the_native_filesystem()
+        public void Then_the_directory_is_created_on_the_native_filesystem()
         {
-            MockFile.VerifyAll();
-            MockFileInfo.VerifyAll();
-            MockFileInfoFactory.VerifyAll();
-            MockFileSystem.VerifyAll();            
+            MockDirectoryInfo.VerifyAll();
+            MockFileSystem.VerifyAll();
         }
 
         [Fact]
-        public void Writes_the_file_to_native_filesystem()
+        public void Creates_the_directory_on_the_native_filesystem()
+        {
+            this.Bddify();
+        }
+    }
+
+    public class Deleting_A_Native_File : NativeSyncProviderSpec
+    {
+        public void Context()
+        {
+            MockFileSystem.MockFile.Setup(p => p.Exists("c:\\somefile.txt")).Returns(true);
+            MockFileSystem.MockFile.Setup(p => p.Delete("c:\\somefile.txt"));
+        }
+
+        public void Given_a_directory_to_be_deleted()
+        {
+            CurrentInstance = new NativeSyncProvider(MockFileSystem, new WindowsFileSystemOptions() { Path = "c:\\" });
+        }
+
+        public void When_the_directory_is_deleted_from_native_filesystem()
+        {
+            CurrentInstance.Delete(new FakeFileEntry() { RelativePath = "somefile.txt" });
+        }
+
+        public void Then_it_is_removed_from_the_filesystem()
+        {
+            MockFileSystem.VerifyAll();
+        }
+
+        [Fact]
+        public void Deletes_the_native_Directory()
+        {
+            this.Bddify();
+        }
+    }
+
+    public class Creating_A_Native_File : NativeSyncProviderSpec
+    {
+        protected Mock<IFileInfoWrap> MockFileInfo;
+        protected FileSystemEntry CreatedEntry;
+        protected MemoryStream FakeSourceStream;
+
+        public void Context()
+        {
+            MockFileInfo = new Mock<IFileInfoWrap>();
+            MockFileInfo.SetupGet(p => p.CreationTimeUtc).Returns(new DateTimeWrap(DateTime.Now.Date));
+            MockFileInfo.SetupGet(p => p.LastWriteTimeUtc).Returns(new DateTimeWrap(DateTime.Now.Date));
+            MockFileSystem.AddFileInfo("c:\\somefile.txt", MockFileInfo.Object);
+
+            MockFileSystem.MockFile.Setup(p => p.Exists("c:\\somefile.txt")).Returns(false);
+
+            var mockStreamWrap = new Mock<IFileStreamWrap>();
+            mockStreamWrap.SetupGet(p => p.StreamInstance).Returns(new MemoryStream());
+
+            MockFileSystem.MockFile.Setup(p => p.Create("c:\\somefile.txt")).Returns(mockStreamWrap.Object);
+        }
+
+        public void Given_a_file_to_be_created()
+        {
+            FakeSourceStream = new MemoryStream(Guid.NewGuid().ToByteArray());
+            FakeSourceStream.Position = 0;
+            
+            CurrentInstance = CreateInstance(new WindowsFileSystemOptions() { Path = "c:\\" });
+        }
+
+        public void When_it_is_created_on_native_filesystem()
+        {
+            CreatedEntry = CurrentInstance.Create(
+                new FakeFileEntry(new MemoryStream())
+                {
+                    RelativePath = "somefile.txt"
+                }
+            );
+        }
+
+        public void Then_the_file_is_created_on_the_native_filesystem()
+        {
+            MockFileInfo.VerifyAll();
+            MockFileSystem.VerifyAll();         
+        }
+
+        [Fact]
+        public void Creates_the_file_on_the_native_filesystem()
         {
             this.Bddify();
         }
@@ -95,33 +191,28 @@ namespace Syncr.FileSystems.Native.Tests
 
     public class Querying_For_Native_Files : NativeSyncProviderSpec
     {
-        IList<FileSystemEntry> FoundEntries;
+        protected IList<FileSystemEntry> FoundEntries;
+        protected Mock<IFileInfoWrap> MockFile = new Mock<IFileInfoWrap>();
+        protected Mock<IDirectoryInfoWrap> MockDir = new Mock<IDirectoryInfoWrap>();
 
         public void Context()
         {
-            var mockDirectory = new Mock<DirectoryBase>();
-            var mockFileInfoFactory = new Mock<IFileInfoFactory>();
-            MockFileSystem.SetupGet(p => p.FileInfo).Returns(mockFileInfoFactory.Object);
-            MockFileSystem.Setup(p => p.Directory).Returns(mockDirectory.Object);
-            
-            var fakeFileInfo = new Mock<FileInfoBase>();
-            fakeFileInfo.SetupGet(p => p.CreationTimeUtc).Returns(DateTime.Now.Date);
-            fakeFileInfo.SetupGet(p =>p.LastWriteTimeUtc).Returns(DateTime.Now.Date);
-            fakeFileInfo.SetupGet(p => p.Length).Returns(100);
-            fakeFileInfo.SetupGet(p => p.FullName).Returns("c:\\somefile.txt");
-            mockFileInfoFactory.Setup(p => p.FromFileName("c:\\somefile.txt")).Returns(fakeFileInfo.Object);
+            MockFile.SetupGet(p => p.CreationTimeUtc).Returns(new DateTimeWrap(DateTime.Now.Date));
+            MockFile.SetupGet(p => p.LastWriteTimeUtc).Returns(new DateTimeWrap(DateTime.Now.Date));
+            MockFile.SetupGet(p => p.Length).Returns(100);
+            MockFile.SetupGet(p => p.FullName).Returns("c:\\somefile.txt");
+            MockFileSystem.AddFileInfo("c:\\somefile.txt", MockFile.Object);
 
-            var fakeDirInfo = new Mock<FileInfoBase>();
-            fakeFileInfo.SetupGet(p => p.CreationTimeUtc).Returns(DateTime.Now.Date);
-            fakeFileInfo.SetupGet(p =>p.LastWriteTimeUtc).Returns(DateTime.Now.Date);
-            fakeDirInfo.SetupGet(p => p.Name).Returns("somedir");
-            fakeDirInfo.SetupGet(p => p.FullName).Returns("c:\\somedir");
-            mockFileInfoFactory.Setup(p => p.FromFileName("c:\\somedir")).Returns(fakeDirInfo.Object);
+            MockDir.SetupGet(p => p.CreationTimeUtc).Returns(new DateTimeWrap(DateTime.Now.Date));
+            MockDir.SetupGet(p => p.LastWriteTimeUtc).Returns(new DateTimeWrap(DateTime.Now.Date));
+            MockDir.SetupGet(p => p.Name).Returns("somedir");
+            MockDir.SetupGet(p => p.FullName).Returns("c:\\somedir");
+            MockFileSystem.AddDirectoryInfo("c:\\somedir", MockDir.Object);
 
-            mockDirectory.Setup(p => p.GetFiles("c:\\", "*", System.IO.SearchOption.AllDirectories)).Returns(
+            MockFileSystem.MockDirectory.Setup(p => p.GetFiles("c:\\", "*", System.IO.SearchOption.AllDirectories)).Returns(
                 new string[] { "c:\\somefile.txt" });
 
-            mockDirectory.Setup(p => p.GetDirectories("c:\\", "*", System.IO.SearchOption.AllDirectories)).Returns(
+            MockFileSystem.MockDirectory.Setup(p => p.GetDirectories("c:\\", "*", System.IO.SearchOption.AllDirectories)).Returns(
                 new string[] { "c:\\somedir" });
         }
 
@@ -146,6 +237,9 @@ namespace Syncr.FileSystems.Native.Tests
             FoundEntries.Count.ShouldBe(2);
             FoundEntries.OfType<NativeFileEntry>().Count().ShouldBe(1);
             FoundEntries.OfType<NativeDirectoryEntry>().Count().ShouldBe(1);
+            MockFileSystem.VerifyAll();
+            MockFile.VerifyAll();
+            MockDir.VerifyAll();
         }
 
         [Fact]

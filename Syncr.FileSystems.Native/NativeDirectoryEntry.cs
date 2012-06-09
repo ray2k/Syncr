@@ -1,9 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
-using System.IO.Abstractions;
-using System.Linq;
-using System.Text;
+using SystemWrapper;
+using SystemWrapper.IO;
 
 namespace Syncr.FileSystems.Native
 {
@@ -11,9 +9,9 @@ namespace Syncr.FileSystems.Native
     {
         public string BaseDirectory { get; set; }
 
-        private FileInfoBase DirectoryInfo { get; set; }
+        private IDirectoryInfoWrap DirectoryInfo { get; set; }
 
-        public NativeDirectoryEntry(FileInfoBase directoryInfo)
+        public NativeDirectoryEntry(IDirectoryInfoWrap directoryInfo)
         {
             this.DirectoryInfo = directoryInfo;
         }
@@ -31,14 +29,13 @@ namespace Syncr.FileSystems.Native
         protected override void WriteCreationTime(DateTime createdUtc)
         {
             string fullPath = Path.Combine(this.BaseDirectory, this.RelativePath);
-
-            this.DirectoryInfo.CreationTimeUtc = createdUtc;
+            this.DirectoryInfo.CreationTimeUtc = new DateTimeWrap(createdUtc);
         }
 
         protected override void WriteModificationTime(DateTime modifiedUtc)
         {
             string fullPath = Path.Combine(this.BaseDirectory, this.RelativePath);
-            this.DirectoryInfo.LastWriteTimeUtc = modifiedUtc;
+            this.DirectoryInfo.LastWriteTimeUtc = new DateTimeWrap(modifiedUtc);
         }
     }
 }
