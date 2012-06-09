@@ -53,6 +53,9 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="NativeDirectoryInfoSpecs.cs" />
+    <Compile Include="NativeFileEntrySpecs.cs" />
+    <Compile Include="NativeSyncProviderSpecs.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

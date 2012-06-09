@@ -11,18 +11,34 @@ namespace Syncr.FileSystems.Native
     public class NativeSyncProvider : ISyncProvider
     {
         protected string BaseDirectory { get; private set; }
-        protected WindowsFileSystemOptions Options { get; private set; }
+        protected string SourcePath { get; private set; }
+        protected string UserName { get; private set; }
+        protected string Password { get; private set; }
+
         protected IFileSystem FileSystem { get; private set; }
 
         public NativeSyncProvider(IFileSystem fileSystem, WindowsFileSystemOptions options)
         {
-            this.Options = options;
+            this.SourcePath = options.Path;
+            this.UserName = options.UserName;
+            this.Password = options.Password;
             this.BaseDirectory = options.Path.WithTrailingPathSeparator();
         }
 
         public NativeSyncProvider(WindowsFileSystemOptions options)
             : this(new FileSystem(), options)
         {   
+        }
+
+        public NativeSyncProvider(LinuxFileSystemOptions options)
+            : this(new FileSystem(), options)
+        {
+        }
+
+        public NativeSyncProvider(IFileSystem fileSystem, LinuxFileSystemOptions options)
+        {
+            this.SourcePath = options.Path;
+            this.BaseDirectory = options.Path.WithTrailingPathSeparator();
         }
 
         private string GetRelativePath(string fullPath)
@@ -41,8 +57,8 @@ namespace Syncr.FileSystems.Native
         private IList<FileSystemEntry> GetDirectoryEntries(SearchOption searchOption)
         {
             return (from d in this.FileSystem.Directory.GetDirectories(this.BaseDirectory, "*", searchOption)
-                              let dirInfo = new DirectoryInfo(d)
-                              select new NativeDirectoryEntry(this.FileSystem.FileInfo)
+                              let dirInfo = this.FileSystem.FileInfo.FromFileName(d)
+                              select new NativeDirectoryEntry(dirInfo)
                               {
                                   BaseDirectory = this.BaseDirectory,
                                   Created = dirInfo.CreationTimeUtc,
@@ -55,8 +71,8 @@ namespace Syncr.FileSystems.Native
         private IList<FileSystemEntry> GetFileEntries(SearchOption searchOption)
         {
             return  (from f in this.FileSystem.Directory.GetFiles(this.BaseDirectory, "*", searchOption)
-                     let fInfo = new FileInfo(f)
-                     select new NativeFileEntry(this.FileSystem.FileInfo)
+                     let fInfo = this.FileSystem.FileInfo.FromFileName(f)
+                     select new NativeFileEntry(fInfo)
                      {
                          BaseDirectory = this.BaseDirectory,
                          Created = fInfo.CreationTimeUtc,
@@ -106,7 +122,7 @@ namespace Syncr.FileSystems.Native
 
             var info = this.FileSystem.FileInfo.FromFileName(fullPath);
 
-            return new NativeFileEntry(this.FileSystem.FileInfo)
+            return new NativeFileEntry(info)
             {
                 BaseDirectory = this.BaseDirectory,
                 Created = info.CreationTimeUtc,
@@ -123,7 +139,7 @@ namespace Syncr.FileSystems.Native
 
             var info = this.FileSystem.FileInfo.FromFileName(fullPath);
 
-            return new NativeDirectoryEntry(this.FileSystem.FileInfo)
+            return new NativeDirectoryEntry(info)
             {
                 BaseDirectory = this.BaseDirectory,
                 Created = info.CreationTimeUtc,

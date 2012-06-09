@@ -11,11 +11,11 @@ namespace Syncr.FileSystems.Native
     {
         public string BaseDirectory { get; set; }
 
-        private IFileInfoFactory FileInfoFactory { get; set; }
+        private FileInfoBase DirectoryInfo { get; set; }
 
-        public NativeDirectoryEntry(IFileInfoFactory fileInfoFactory)
+        public NativeDirectoryEntry(FileInfoBase directoryInfo)
         {
-            this.FileInfoFactory = fileInfoFactory;
+            this.DirectoryInfo = directoryInfo;
         }
 
         public override bool CanWriteCreationTime
@@ -32,13 +32,13 @@ namespace Syncr.FileSystems.Native
         {
             string fullPath = Path.Combine(this.BaseDirectory, this.RelativePath);
 
-            this.FileInfoFactory.FromFileName(fullPath).CreationTimeUtc = createdUtc;
+            this.DirectoryInfo.CreationTimeUtc = createdUtc;
         }
 
         protected override void WriteModificationTime(DateTime modifiedUtc)
         {
             string fullPath = Path.Combine(this.BaseDirectory, this.RelativePath);
-            this.FileInfoFactory.FromFileName(fullPath).LastWriteTimeUtc = modifiedUtc;
+            this.DirectoryInfo.LastWriteTimeUtc = modifiedUtc;
         }
     }
 }

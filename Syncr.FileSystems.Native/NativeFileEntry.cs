@@ -10,20 +10,20 @@ namespace Syncr.FileSystems.Native
 {
     public sealed class NativeFileEntry : FileEntry
     {
-        private IFileInfoFactory FileInfoFactory { get; set; }
+        private FileInfoBase FileInfo { get; set; }
         
         public string BaseDirectory { get; set; }
 
-        public NativeFileEntry(IFileInfoFactory fileInfoFactory)
+        public NativeFileEntry(FileInfoBase fileInfo)
         {
-            this.FileInfoFactory = fileInfoFactory;
+            this.FileInfo = fileInfo;
         }       
 
         public override System.IO.Stream Open()
         {
             string fullPath = Path.Combine(this.BaseDirectory, this.RelativePath);
 
-            return this.FileInfoFactory.FromFileName(fullPath).Open(FileMode.Open, FileAccess.Read, FileShare.Read);
+            return this.FileInfo.Open(FileMode.Open, FileAccess.Read, FileShare.Read);
         }
 
         public override bool CanWriteCreationTime
@@ -40,13 +40,13 @@ namespace Syncr.FileSystems.Native
         {
             string fullPath = Path.Combine(this.BaseDirectory, this.RelativePath);
 
-            this.FileInfoFactory.FromFileName(fullPath).CreationTimeUtc = created;
+            this.FileInfo.CreationTimeUtc = created;
         }
 
         protected override void WriteModificationTime(DateTime modified)
         {
             string fullPath = Path.Combine(this.BaseDirectory, this.RelativePath);
-            this.FileInfoFactory.FromFileName(fullPath).LastWriteTimeUtc = modified;
+            this.FileInfo.LastWriteTimeUtc = modified;
         }
     }
 }
