@@ -19,6 +19,7 @@ namespace Syncr.FileSystems.Native
 
         public NativeSyncProvider(IFileSystem fileSystem, WindowsFileSystemOptions options)
         {
+            this.FileSystem = fileSystem;
             this.SourcePath = options.Path;
             this.UserName = options.UserName;
             this.Password = options.Password;
@@ -37,6 +38,7 @@ namespace Syncr.FileSystems.Native
 
         public NativeSyncProvider(IFileSystem fileSystem, LinuxFileSystemOptions options)
         {
+            this.FileSystem = fileSystem;
             this.SourcePath = options.Path;
             this.BaseDirectory = options.Path.WithTrailingPathSeparator();
         }
@@ -56,16 +58,17 @@ namespace Syncr.FileSystems.Native
 
         private IList<FileSystemEntry> GetDirectoryEntries(SearchOption searchOption)
         {
-            return (from d in this.FileSystem.Directory.GetDirectories(this.BaseDirectory, "*", searchOption)
-                              let dirInfo = this.FileSystem.FileInfo.FromFileName(d)
-                              select new NativeDirectoryEntry(dirInfo)
-                              {
-                                  BaseDirectory = this.BaseDirectory,
-                                  Created = dirInfo.CreationTimeUtc,
-                                  Modified = dirInfo.LastWriteTimeUtc,
-                                  Name = dirInfo.Name,
-                                  RelativePath = GetRelativePath(dirInfo.FullName)
-                              }).Cast<FileSystemEntry>().ToList();
+            var directories = this.FileSystem.Directory.GetDirectories(this.BaseDirectory, "*", searchOption);
+            return (from d in directories
+                    let dirInfo = this.FileSystem.FileInfo.FromFileName(d)
+                    select new NativeDirectoryEntry(dirInfo)
+                    {
+                        BaseDirectory = this.BaseDirectory,
+                        Created = dirInfo.CreationTimeUtc,
+                        Modified = dirInfo.LastWriteTimeUtc,
+                        Name = dirInfo.Name,
+                        RelativePath = GetRelativePath(dirInfo.FullName)
+                    }).Cast<FileSystemEntry>().ToList();
         }
 
         private IList<FileSystemEntry> GetFileEntries(SearchOption searchOption)
