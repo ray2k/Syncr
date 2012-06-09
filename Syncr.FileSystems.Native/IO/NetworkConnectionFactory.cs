@@ -8,14 +8,11 @@ namespace Syncr.FileSystems.Native.IO
 {
     public sealed class NetworkConnectionFactory : Syncr.FileSystems.Native.IO.INetworkConnectionFactory
     {
-        public INetworkConnection CreateConnection(string remotePath, string user, string password, string domain)
+        public INetworkConnection CreateConnection(string remotePath, string user, string password)
         {
             NetworkCredential credentials = null;
 
-            if (domain == null)
-                credentials = new NetworkCredential(user, password);
-            else
-                credentials = new NetworkCredential(user, password, domain);
+            credentials = new NetworkCredential(user, password);
 
             return new NetworkConnection(remotePath, credentials);
         }

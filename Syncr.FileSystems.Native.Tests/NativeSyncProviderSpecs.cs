@@ -51,7 +51,7 @@ namespace Syncr.FileSystems.Native.Tests
             MockConnection = new Mock<INetworkConnection>();
             MockConnection.Setup(p => p.Connect());
 
-            MockConnectionFactory.Setup(p => p.CreateConnection("\\\\remotepath\\remotedir", "username", "password", "domain")).Returns(MockConnection.Object);
+            MockConnectionFactory.Setup(p => p.CreateConnection("\\\\remotepath\\remotedir", "username", "password")).Returns(MockConnection.Object);
         }
 
         public void Given_a_remote_native_filesystem_with_a_file_and_directory()
@@ -60,7 +60,6 @@ namespace Syncr.FileSystems.Native.Tests
                 new WindowsFileSystemOptions()
                 {
                     Path = "\\\\remotepath\\remotedir",
-                    Domain = "domain",
                     Password = "password",
                     UserName = "username"
                 }

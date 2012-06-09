@@ -24,9 +24,5 @@ namespace Syncr.FileSystems.Native
         [Category("Network Path")]
         [Description("Password for the user account to access the remote file system")]
         public string Password { get; set; }
-
-        [Category("Network Path")]
-        [Description("Domain of the user account to access to the remote file system")]
-        public string Domain { get; set; }
     }
 }

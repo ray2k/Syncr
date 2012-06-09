@@ -11,7 +11,6 @@ namespace Syncr.FileSystems.Native
         private string BaseDirectory { get; set; }        
         private string UserName { get; set; }
         private string Password { get; set; }
-        private string Domain { get; set; }
         private INetworkConnection CurrentConnection { get; set; }
         private INetworkConnectionFactory ConnectionFactory { get; set; }
         private IFileSystem FileSystem { get;  set; }
@@ -22,7 +21,6 @@ namespace Syncr.FileSystems.Native
             this.ConnectionFactory = connectionFactory;
             this.UserName = options.UserName;
             this.Password = options.Password;
-            this.Domain = options.Domain;
 
             if (this.UserName == null)
                 this.BaseDirectory = options.Path.WithTrailingPathSeparator();
@@ -203,7 +201,7 @@ namespace Syncr.FileSystems.Native
             // so we have a UNC base directory and ability to connect
             if (this.CurrentConnection == null && this.UserName != null && this.Password != null)
             {
-                this.CurrentConnection = this.ConnectionFactory.CreateConnection(this.BaseDirectory, this.UserName, this.Password, this.Domain);
+                this.CurrentConnection = this.ConnectionFactory.CreateConnection(this.BaseDirectory, this.UserName, this.Password);
                 this.CurrentConnection.Connect();
             }
         }
