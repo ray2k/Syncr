@@ -42,7 +42,7 @@ namespace Syncr.FileSystems.Native.IO
 
             if (result != 0)
             {
-                throw new Win32Exception(result, "Error connecting to remote share");
+                throw new Win32Exception(result, string.Format("Error connecting to remote share ({0})", result));
             }
         }
 
@@ -54,7 +54,7 @@ namespace Syncr.FileSystems.Native.IO
 
         protected virtual void Dispose(bool disposing)
         {
-            WNetCancelConnection2(_networkName, 0, true);
+            WNetCancelConnection2(_networkName, 0x1, true);
         }
 
         [DllImport("mpr.dll")]

@@ -23,7 +23,11 @@ namespace Syncr.FileSystems.Native
             this.UserName = options.UserName;
             this.Password = options.Password;
             this.Domain = options.Domain;
-            this.BaseDirectory = options.Path.WithTrailingPathSeparator();
+
+            if (this.UserName == null)
+                this.BaseDirectory = options.Path.WithTrailingPathSeparator();
+            else
+                this.BaseDirectory = options.Path.WithoutTrailingPathSeparator();
         }
 
         public NativeSyncProvider(WindowsFileSystemOptions options)

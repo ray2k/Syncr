@@ -12,6 +12,8 @@ using Syncr.FileSystems.Native.IO;
 using Syncr.FileSystems.Native.Tests.IO;
 using SystemWrapper.IO;
 using SystemWrapper;
+using System.Net;
+using System.Runtime.InteropServices;
 
 namespace Syncr.FileSystems.Native.Tests
 {
@@ -37,7 +39,7 @@ namespace Syncr.FileSystems.Native.Tests
         }
 
         protected NativeSyncProvider CurrentInstance { get; set; }
-    }
+    }   
 
     public class Querying_Contents_Using_Network_Path : NativeSyncProviderSpec
     {
@@ -49,7 +51,7 @@ namespace Syncr.FileSystems.Native.Tests
             MockConnection = new Mock<INetworkConnection>();
             MockConnection.Setup(p => p.Connect());
 
-            MockConnectionFactory.Setup(p => p.CreateConnection("\\\\remotepath\\remotedir\\", "username", "password", "domain")).Returns(MockConnection.Object);
+            MockConnectionFactory.Setup(p => p.CreateConnection("\\\\remotepath\\remotedir", "username", "password", "domain")).Returns(MockConnection.Object);
         }
 
         public void Given_a_remote_native_filesystem_with_a_file_and_directory()
