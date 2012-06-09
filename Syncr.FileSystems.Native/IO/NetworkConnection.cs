@@ -41,9 +41,7 @@ namespace Syncr.FileSystems.Native.IO
                 0);
 
             if (result != 0)
-            {
-                throw new Win32Exception(result, string.Format("Error connecting to remote share ({0})", result));
-            }
+                throw new Win32Exception(result);
         }
 
         public void Dispose()
@@ -58,12 +56,10 @@ namespace Syncr.FileSystems.Native.IO
         }
 
         [DllImport("mpr.dll")]
-        private static extern int WNetAddConnection2(NetResource netResource,
-            string password, string username, int flags);
+        private static extern int WNetAddConnection2(NetResource netResource, string password, string username, int flags);
 
         [DllImport("mpr.dll")]
-        private static extern int WNetCancelConnection2(string name, int flags,
-            bool force);
+        private static extern int WNetCancelConnection2(string name, int flags, bool force);
     }
 
     [StructLayout(LayoutKind.Sequential)]
