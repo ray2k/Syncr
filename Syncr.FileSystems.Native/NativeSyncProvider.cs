@@ -3,6 +3,7 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using Syncr.FileSystems.Native.IO;
+using System;
 
 namespace Syncr.FileSystems.Native
 {

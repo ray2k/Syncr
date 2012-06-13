@@ -8,7 +8,7 @@ namespace Syncr
 {
     public interface ISyncProvider : IDisposable
     {
-        IEnumerable<FileSystemEntry> GetFileSystemEntries(SearchOption seachOption);
+        IEnumerable<FileSystemEntry> GetFileSystemEntries(SearchOption searchOption);
         FileSystemEntry Create(FileSystemEntry entry);
         void Delete(FileSystemEntry entry);        
         string Id { get; set; }        

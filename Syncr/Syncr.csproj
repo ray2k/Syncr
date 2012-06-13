@@ -36,6 +36,7 @@
   <ItemGroup>
     <Compile Include="ConflictBehavior.cs" />
     <Compile Include="DirectoryEntry.cs" />
+    <Compile Include="Extensions.cs" />
     <Compile Include="FileEntry.cs" />
     <Compile Include="FileSystemChange.cs" />
     <Compile Include="FileSystemChangeDetector.cs" />

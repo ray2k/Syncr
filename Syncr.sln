@@ -15,6 +15,18 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".nuget", ".nuget", "{3F885A
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Syncr.FileSystems.Native.Tests", "Syncr.FileSystems.Native.Tests\Syncr.FileSystems.Native.Tests.csproj", "{E1028272-EC3D-4672-839F-B407A70C45C6}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Syncr.FileSystems.AmazonS3", "Syncr.FileSystems.AmazonS3\Syncr.FileSystems.AmazonS3.csproj", "{5BB1E07D-EF18-43FE-8E9A-DB4D9A2AC071}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Syncr.FileSystems.AmazonS3.Tests", "Syncr.FileSystems.AmazonS3.Tests\Syncr.FileSystems.AmazonS3.Tests.csproj", "{725E620A-F670-4FD6-88AB-96DC53D0A4F3}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{4E2C66DF-4FC5-42C5-B0F6-5608FC4C4FDB}"
+	ProjectSection(SolutionItems) = preProject
+		Performance1.psess = Performance1.psess
+		Performance2.psess = Performance2.psess
+	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Syncr.TestClient", "Syncr.TestClient\Syncr.TestClient.csproj", "{4E1D4B10-8393-436B-9AC2-54DC2BCB629E}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -29,6 +41,18 @@ Global
 		{1636A60F-9FDF-43E8-BD5F-01838D6DDB55}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{1636A60F-9FDF-43E8-BD5F-01838D6DDB55}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{1636A60F-9FDF-43E8-BD5F-01838D6DDB55}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4E1D4B10-8393-436B-9AC2-54DC2BCB629E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4E1D4B10-8393-436B-9AC2-54DC2BCB629E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4E1D4B10-8393-436B-9AC2-54DC2BCB629E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4E1D4B10-8393-436B-9AC2-54DC2BCB629E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5BB1E07D-EF18-43FE-8E9A-DB4D9A2AC071}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5BB1E07D-EF18-43FE-8E9A-DB4D9A2AC071}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5BB1E07D-EF18-43FE-8E9A-DB4D9A2AC071}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5BB1E07D-EF18-43FE-8E9A-DB4D9A2AC071}.Release|Any CPU.Build.0 = Release|Any CPU
+		{725E620A-F670-4FD6-88AB-96DC53D0A4F3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{725E620A-F670-4FD6-88AB-96DC53D0A4F3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{725E620A-F670-4FD6-88AB-96DC53D0A4F3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{725E620A-F670-4FD6-88AB-96DC53D0A4F3}.Release|Any CPU.Build.0 = Release|Any CPU
 		{B8386865-E022-4CBA-8876-3CB5D3C39F35}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{B8386865-E022-4CBA-8876-3CB5D3C39F35}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B8386865-E022-4CBA-8876-3CB5D3C39F35}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -40,5 +64,8 @@ Global
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(Performance) = preSolution
+		HasPerformanceSessions = true
 	EndGlobalSection
 EndGlobal

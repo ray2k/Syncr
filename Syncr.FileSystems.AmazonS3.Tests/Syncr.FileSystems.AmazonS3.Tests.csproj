@@ -4,12 +4,12 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{14B927CD-6D48-4556-8654-A32D50095783}</ProjectGuid>
+    <ProjectGuid>{725E620A-F670-4FD6-88AB-96DC53D0A4F3}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Syncr.FileSystems.Native</RootNamespace>
-    <AssemblyName>Syncr.FileSystems.Native</AssemblyName>
-    <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
+    <RootNamespace>Syncr.FileSystems.AmazonS3.Tests</RootNamespace>
+    <AssemblyName>Syncr.FileSystems.AmazonS3.Tests</AssemblyName>
+    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\</SolutionDir>
     <RestorePackages>true</RestorePackages>
@@ -32,37 +32,46 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="AWSSDK">
+      <HintPath>..\packages\AWSSDK.1.4.10.0\lib\AWSSDK.dll</HintPath>
+    </Reference>
+    <Reference Include="Bddify">
+      <HintPath>..\packages\Bddify.2.11\lib\NET40\Bddify.dll</HintPath>
+    </Reference>
+    <Reference Include="Moq">
+      <HintPath>..\packages\Moq.4.0.10827\lib\NET40\Moq.dll</HintPath>
+    </Reference>
+    <Reference Include="Shouldly">
+      <HintPath>..\packages\Shouldly.1.1.1.1\lib\35\Shouldly.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
-    <Reference Include="SystemWrapper">
-      <HintPath>..\packages\SystemWrapper.0.4\lib\SystemWrapper.dll</HintPath>
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="xunit">
+      <HintPath>..\packages\xunit.1.9.0.1566\lib\xunit.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="IO\FileSystem.cs" />
-    <Compile Include="IO\IFileSystem.cs" />
-    <Compile Include="IO\INetworkConnection.cs" />
-    <Compile Include="IO\INetworkConnectionFactory.cs" />
-    <Compile Include="IO\NetworkConnection.cs" />
-    <Compile Include="IO\NetworkConnectionFactory.cs" />
-    <Compile Include="LinuxFileSystemOptions.cs" />
-    <Compile Include="NativeDirectoryEntry.cs" />
-    <Compile Include="NativeFileEntry.cs" />
-    <Compile Include="NativeSyncProvider.cs" />
-    <Compile Include="NativeFileSystemOptionsFactory.cs" />
-    <Compile Include="NativeSyncProviderFactory.cs" />
+    <Compile Include="AmazonS3SyncProviderSpecs.cs" />
+    <Compile Include="FakeDirectoryEntry.cs" />
+    <Compile Include="FakeFileEntry.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Runtime.cs" />
-    <Compile Include="WindowsFileSystemOptions.cs" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Syncr.FileSystems.AmazonS3\Syncr.FileSystems.AmazonS3.csproj">
+      <Project>{5bb1e07d-ef18-43fe-8e9a-db4d9a2ac071}</Project>
+      <Name>Syncr.FileSystems.AmazonS3</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Syncr\Syncr.csproj">
       <Project>{b8386865-e022-4cba-8876-3cb5d3c39f35}</Project>
       <Name>Syncr</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <None Include="packages.config" />
+    <Content Include="Bddify.ReadMe.txt" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="$(SolutionDir)\.nuget\nuget.targets" />

@@ -4,11 +4,11 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{14B927CD-6D48-4556-8654-A32D50095783}</ProjectGuid>
+    <ProjectGuid>{5BB1E07D-EF18-43FE-8E9A-DB4D9A2AC071}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Syncr.FileSystems.Native</RootNamespace>
-    <AssemblyName>Syncr.FileSystems.Native</AssemblyName>
+    <RootNamespace>Syncr.FileSystems.AmazonS3</RootNamespace>
+    <AssemblyName>Syncr.FileSystems.AmazonS3</AssemblyName>
     <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\</SolutionDir>
@@ -32,28 +32,19 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="System" />
-    <Reference Include="System.Core" />
-    <Reference Include="SystemWrapper">
-      <HintPath>..\packages\SystemWrapper.0.4\lib\SystemWrapper.dll</HintPath>
+    <Reference Include="AWSSDK">
+      <HintPath>..\packages\AWSSDK.1.4.10.0\lib\AWSSDK.dll</HintPath>
     </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.ComponentModel.DataAnnotations" />
+    <Reference Include="System.Core" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="IO\FileSystem.cs" />
-    <Compile Include="IO\IFileSystem.cs" />
-    <Compile Include="IO\INetworkConnection.cs" />
-    <Compile Include="IO\INetworkConnectionFactory.cs" />
-    <Compile Include="IO\NetworkConnection.cs" />
-    <Compile Include="IO\NetworkConnectionFactory.cs" />
-    <Compile Include="LinuxFileSystemOptions.cs" />
-    <Compile Include="NativeDirectoryEntry.cs" />
-    <Compile Include="NativeFileEntry.cs" />
-    <Compile Include="NativeSyncProvider.cs" />
-    <Compile Include="NativeFileSystemOptionsFactory.cs" />
-    <Compile Include="NativeSyncProviderFactory.cs" />
+    <Compile Include="AmazonS3FileSystemOptions.cs" />
+    <Compile Include="AmazonS3SyncProvider.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Runtime.cs" />
-    <Compile Include="WindowsFileSystemOptions.cs" />
+    <Compile Include="S3DirectoryEntry.cs" />
+    <Compile Include="S3FileEntry.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Syncr\Syncr.csproj">
